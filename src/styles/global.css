@@ -1,6 +1,7 @@
 @import "tailwindcss";
 
 @plugin "tailwindcss-animate";
+@plugin "@tailwindcss/typography";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -40,6 +41,9 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+  --font-sans: var(--font-questrial);
+  --font-serif: var(--font-lemon-milk);
+  --font-display: var(--font-headline);
 }
 
 :root {
@@ -119,8 +123,11 @@
   * {
     @apply border-border outline-ring/50;
   }
+  html {
+    font-size: 18px;
+  }
   body {
-    @apply bg-background text-foreground font-sans;
+    @apply bg-background text-foreground font-sans flex flex-col min-h-screen w-full;
   }
   h1,
   h2,
@@ -128,6 +135,6 @@
   h4,
   h5,
   h6 {
-    @apply font-serif;
+    @apply font-serif tracking-wider;
   }
 }
