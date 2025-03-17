@@ -1,7 +1,15 @@
-import { fetchPage } from "@/lib/api/ghost";
+import { fetchPage, fetchPages } from "@/lib/api/ghost";
+import type { Page } from "@/lib/api/types";
 
 interface PageParams {
   params: Promise<{ slug: string }>;
+}
+
+export async function generateStaticParams() {
+  const pages = await fetchPages();
+  return pages.map((page: Page) => ({
+    slug: String(page.slug),
+  }));
 }
 
 export default async function Page({ params }: PageParams) {
