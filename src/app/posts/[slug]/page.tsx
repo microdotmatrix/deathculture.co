@@ -1,3 +1,4 @@
+import { Content } from "@/components/ghost/content";
 import { fetchPost } from "@/lib/api/ghost";
 import { formatDate } from "@/lib/utils";
 import Image from "next/image";
@@ -31,10 +32,7 @@ export default async function PostPage({ params }: PageParams) {
               <p className="text-gray-500">{formatDate(post.created_at)}</p>
             </div>
           </header>
-          <div
-            className="prose max-w-none"
-            dangerouslySetInnerHTML={{ __html: post.html }}
-          />
+          <Content data={post.html} />
         </div>
       </article>
     </main>

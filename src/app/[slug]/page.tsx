@@ -1,4 +1,5 @@
 import { ContactForm } from "@/components/contact";
+import { Content } from "@/components/ghost/content";
 import { fetchPage, fetchPages } from "@/lib/api/ghost";
 import type { Page } from "@/lib/api/types";
 import { notFound } from "next/navigation";
@@ -49,10 +50,7 @@ export default async function Page({ params }: PageParams) {
         </header>
         <section className="flex flex-col lg:flex-row gap-8 items-stretch justify-center">
           <article>
-            <div
-              className="prose mx-auto max-w-screen-xl"
-              dangerouslySetInnerHTML={{ __html: page.html }}
-            />
+            <Content data={page.html} />
           </article>
           <aside>
             <ContactForm />
@@ -68,10 +66,7 @@ export default async function Page({ params }: PageParams) {
         <header className="py-12">
           <h1>{page.title}</h1>
         </header>
-        <div
-          className="prose max-w-none prose-img:my-0"
-          dangerouslySetInnerHTML={{ __html: page.html }}
-        />
+        <Content data={page.html} />
       </section>
     </main>
   );
