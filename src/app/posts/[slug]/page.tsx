@@ -1,4 +1,5 @@
 import { fetchPost } from "@/lib/api/ghost";
+import { formatDate } from "@/lib/utils";
 import Image from "next/image";
 
 interface PageParams {
@@ -20,9 +21,20 @@ export default async function PostPage({ params }: PageParams) {
         />
       </aside>
       <article className="flex-3 px-12 flex flex-col justify-center">
-        <div className="max-w-3xl my-auto">
-          <h1 className="text-4xl font-bold mb-4">{post.title}</h1>
-          <div dangerouslySetInnerHTML={{ __html: post.html }} />
+        <div className="max-w-3xl my-auto py-12 lg:py-20">
+          <header className="mb-8 border-b">
+            <h1 className="text-4xl font-bold mb-4">{post.title}</h1>
+            <div className="mb-4 flex items-center justify-between">
+              <p className="text-gray-500">
+                Posted by: {post.primary_author?.name}
+              </p>
+              <p className="text-gray-500">{formatDate(post.created_at)}</p>
+            </div>
+          </header>
+          <div
+            className="prose max-w-none"
+            dangerouslySetInnerHTML={{ __html: post.html }}
+          />
         </div>
       </article>
     </main>

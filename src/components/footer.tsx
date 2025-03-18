@@ -1,7 +1,8 @@
+import type { Globals } from "@/lib/api/types";
 import Link from "next/link";
 import { Icon } from "./ui/icon";
 
-export const Footer = () => {
+export const Footer = ({ globals }: { globals: Globals }) => {
   return (
     <footer className="bg-black">
       <div className="bg-indigo-900 py-6">
@@ -175,32 +176,16 @@ export const Footer = () => {
               </div>
 
               <nav className="flex flex-col gap-4">
-                <div>
-                  <a
-                    href="#"
-                    className="text-gray-500 transition duration-100 hover:text-indigo-500 active:text-indigo-600"
-                  >
-                    Terms of Service
-                  </a>
-                </div>
-
-                <div>
-                  <a
-                    href="#"
-                    className="text-gray-500 transition duration-100 hover:text-indigo-500 active:text-indigo-600"
-                  >
-                    Privacy Policy
-                  </a>
-                </div>
-
-                <div>
-                  <a
-                    href="#"
-                    className="text-gray-500 transition duration-100 hover:text-indigo-500 active:text-indigo-600"
-                  >
-                    Cookie settings
-                  </a>
-                </div>
+                {globals.secondary_navigation.map((item) => (
+                  <div key={item.url}>
+                    <a
+                      href={item.url}
+                      className="text-gray-500 transition duration-100 hover:text-indigo-500 active:text-indigo-600"
+                    >
+                      {item.label}
+                    </a>
+                  </div>
+                ))}
               </nav>
             </div>
           </div>

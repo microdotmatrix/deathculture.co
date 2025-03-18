@@ -1,3 +1,5 @@
+import { cache } from "./cache";
+
 export async function ghost({
   endpoint,
   params,
@@ -36,6 +38,7 @@ export async function fetchPosts() {
     params: {
       limit: "100",
       include: "tags,authors",
+      order: "published_at%20desc",
     },
   });
   return await response.posts;
@@ -82,3 +85,10 @@ export async function fetchPost(slug: string) {
   });
   return await response.posts[0];
 }
+
+export const getPages = cache(() => fetchPages(), ["pages"], {
+  revalidate: 60,
+});
+export const getPage = cache((slug: string) => fetchPage(slug), ["page"], {
+  revalidate: 60,
+});

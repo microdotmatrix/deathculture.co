@@ -20,6 +20,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const globals = await fetchGlobals();
   return (
     <html lang="en">
       <body
@@ -31,10 +32,10 @@ export default async function RootLayout({
         )}
       >
         <header>
-          <Nav />
+          <Nav globals={globals} />
         </header>
         {children}
-        <Footer />
+        <Footer globals={globals} />
       </body>
     </html>
   );

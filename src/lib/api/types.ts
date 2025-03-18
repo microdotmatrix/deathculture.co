@@ -75,3 +75,29 @@ export interface Page {
     url: string;
   };
 }
+
+export interface Globals {
+  title: string;
+  description: string;
+  logo: string;
+  icon: string;
+  accent_color: string;
+  cover_image: string;
+  facebook: string;
+  twitter: string;
+  lang: string;
+  timezone: string;
+  navigation: Navigation[];
+  secondary_navigation: Navigation[];
+  og_title: string;
+  og_description: string;
+  og_image: string;
+  twitter_image: string;
+  twitter_title: string;
+  twitter_description: string;
+}
+
+export interface Navigation {
+  label: string;
+  url: string;
+}
