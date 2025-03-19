@@ -38,7 +38,6 @@ export async function fetchPosts() {
     params: {
       limit: "100",
       include: "tags,authors",
-      order: "published_at%20desc",
     },
   });
   return await response.posts;
