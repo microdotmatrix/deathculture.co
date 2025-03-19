@@ -3,6 +3,7 @@ import { fetchPost, fetchPosts } from "@/lib/api/ghost";
 import { Post } from "@/lib/api/types";
 import { formatDate } from "@/lib/utils";
 import Image from "next/image";
+import { notFound } from "next/navigation";
 
 interface PageParams {
   params: Promise<{ slug: string }>;
@@ -15,9 +16,28 @@ export async function generateStaticParams() {
   }));
 }
 
+export async function generateMetadata({ params }: PageParams) {
+  const { slug } = await params;
+  const post = await fetchPost(slug);
+  if (!post) {
+    return notFound();
+  }
+  return {
+    title: post.title,
+    description: post.excerpt,
+    openGraph: {
+      title: post.og_title || post.title,
+      description: post.og_description || post.excerpt,
+    },
+  };
+}
+
 export default async function PostPage({ params }: PageParams) {
   const { slug } = await params;
   const post = await fetchPost(slug);
+  if (!post) {
+    return notFound();
+  }
   return (
     <main className="flex items-stretch flex-1">
       <aside className="relative min-h-svh w-full flex-2">
