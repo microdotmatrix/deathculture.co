@@ -1,10 +1,18 @@
 import { Content } from "@/components/ghost/content";
-import { fetchPost } from "@/lib/api/ghost";
+import { fetchPost, fetchPosts } from "@/lib/api/ghost";
+import { Post } from "@/lib/api/types";
 import { formatDate } from "@/lib/utils";
 import Image from "next/image";
 
 interface PageParams {
   params: Promise<{ slug: string }>;
+}
+
+export async function generateStaticParams() {
+  const posts = await fetchPosts();
+  return posts.map((post: Post) => ({
+    slug: String(post.slug),
+  }));
 }
 
 export default async function PostPage({ params }: PageParams) {

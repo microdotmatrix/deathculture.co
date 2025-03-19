@@ -4,17 +4,6 @@ import { formatDate } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
 
-export async function generateStaticParams() {
-  const posts = await fetchPosts();
-  return posts.map((post: Post) => ({
-    slug: String(post.slug),
-  }));
-}
-
-interface PageParams {
-  params: Promise<{ slug: string }>;
-}
-
 export default async function Page() {
   const posts = await fetchPosts();
   return (
