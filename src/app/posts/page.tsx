@@ -1,5 +1,5 @@
 import { fetchPosts } from "@/lib/api/ghost";
-import type { Post } from "@/lib/api/types";
+import type { ContentProps } from "@/lib/api/types";
 import { formatDate } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
@@ -13,7 +13,7 @@ export default async function Page() {
   );
 }
 
-const PostList = ({ posts }: { posts: Post[] }) => {
+const PostList = ({ posts }: { posts: ContentProps[] }) => {
   return (
     <div className="bg-white py-6 sm:py-8 lg:py-12">
       <div className="mx-auto max-w-screen-2xl px-4 md:px-8">
@@ -30,7 +30,7 @@ const PostList = ({ posts }: { posts: Post[] }) => {
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2 md:gap-6 lg:grid-cols-3 xl:grid-cols-4 xl:gap-8">
-          {posts.map((post: Post) => (
+          {posts.map((post: ContentProps) => (
             <Link
               key={post.id}
               href={`/posts/${post.slug}`}

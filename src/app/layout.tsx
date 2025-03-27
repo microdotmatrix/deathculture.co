@@ -2,7 +2,8 @@ import "@/styles/global.css";
 import "@/styles/vendor.css";
 
 import { Footer } from "@/components/footer";
-import { Nav } from "@/components/nav";
+import { Header } from "@/components/header";
+import { TailwindIndicator } from "@/components/ui/tailwind";
 import { fetchGlobals } from "@/lib/api/ghost";
 import { headline, lemonMilk, questrial } from "@/lib/fonts";
 import { cn } from "@/lib/utils";
@@ -31,11 +32,10 @@ export default async function RootLayout({
           "antialiased"
         )}
       >
-        <header>
-          <Nav globals={globals} />
-        </header>
+        <Header globals={globals} />
         {children}
         <Footer globals={globals} />
+        {process.env.NODE_ENV === "development" && <TailwindIndicator />}
       </body>
     </html>
   );

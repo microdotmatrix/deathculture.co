@@ -1,29 +1,36 @@
 import type { Globals } from "@/lib/api/types";
 import Link from "next/link";
+import { Button } from "./ui/button";
 import { Icon } from "./ui/icon";
+import { Input } from "./ui/input";
 
 export const Footer = ({ globals }: { globals: Globals }) => {
   return (
     <footer className="bg-black">
-      <div className="bg-indigo-900 py-6">
+      <div className="bg-primary py-6">
         <div className="mx-auto max-w-screen-2xl px-4 md:px-8">
           <div className="flex flex-col items-center justify-between gap-2 md:flex-row">
             <div className="mb-3 text-center md:mb-0 md:text-left">
               <span className="font-bold uppercase tracking-widest text-gray-100">
                 Newsletter
               </span>
-              <p className="text-indigo-200">Subscribe to our newsletter</p>
+              <p className="text-gray-200">Subscribe to our newsletter</p>
             </div>
 
-            <form className="flex w-full gap-2 md:max-w-md">
-              <input
+            <form className="flex w-full items-center gap-2 md:max-w-md">
+              <Input
                 placeholder="Email"
-                className="w-full flex-1 rounded border border-white bg-indigo-400 px-3 py-2 text-white placeholder-indigo-100 outline-none ring-indigo-300 transition duration-100 focus:ring"
+                type="email"
+                className="rounded-none bg-white/50 border-border"
               />
 
-              <button className="inline-block rounded bg-white px-8 py-2 text-center text-sm font-semibold text-indigo-500 outline-none ring-indigo-300 transition duration-100 hover:bg-gray-100 focus-visible:ring active:text-indigo-600 md:text-base">
-                Send
-              </button>
+              <Button
+                type="submit"
+                variant="secondary"
+                className="rounded-none"
+              >
+                Subscribe
+              </Button>
             </form>
           </div>
         </div>
@@ -32,31 +39,19 @@ export const Footer = ({ globals }: { globals: Globals }) => {
       <div className="pt-12 lg:pt-16">
         <div className="mx-auto max-w-screen-2xl px-4 md:px-8">
           <div className="mb-16 grid grid-cols-2 gap-12 md:grid-cols-4 lg:grid-cols-6 lg:gap-8">
-            <div className="col-span-full lg:col-span-2">
-              <div className="mb-4 lg:-mt-2">
-                <a
+            <div className="col-span-full lg:col-span-2 flex flex-col justify-between">
+              <div className="mb-4 lg:-mt-2 space-y-4">
+                <Link
                   href="/"
                   className="inline-flex items-center gap-2 text-xl font-bold text-slate-100 md:text-2xl"
                   aria-label="logo"
                 >
-                  <svg
-                    width="95"
-                    height="94"
-                    viewBox="0 0 95 94"
-                    className="h-auto w-5 text-indigo-500"
-                    fill="currentColor"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path d="M96 0V47L48 94H0V47L48 0H96Z" />
-                  </svg>
+                  <Icon icon="simple-icons:ghost" className="size-8" />
                   DeathCulture.co
-                </a>
-              </div>
+                </Link>
 
-              <p className="mb-6 text-gray-500 sm:pr-8">
-                Filler text is dummy text which has no meaning however looks
-                very similar to real text
-              </p>
+                <p className="text-gray-500 sm:pr-8">{globals.description}</p>
+              </div>
 
               <div className="flex gap-4">
                 <a
@@ -178,12 +173,12 @@ export const Footer = ({ globals }: { globals: Globals }) => {
               <nav className="flex flex-col gap-4">
                 {globals.secondary_navigation.map((item) => (
                   <div key={item.url}>
-                    <a
+                    <Link
                       href={item.url}
-                      className="text-gray-500 transition duration-100 hover:text-indigo-500 active:text-indigo-600"
+                      className="text-gray-500 transition duration-100 hover:text-primary active:text-primary"
                     >
                       {item.label}
-                    </a>
+                    </Link>
                   </div>
                 ))}
               </nav>

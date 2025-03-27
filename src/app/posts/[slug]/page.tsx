@@ -1,6 +1,6 @@
 import { Content } from "@/components/ghost/content";
 import { fetchPost, fetchPosts } from "@/lib/api/ghost";
-import { Post } from "@/lib/api/types";
+import type { ContentProps } from "@/lib/api/types";
 import { formatDate } from "@/lib/utils";
 import Image from "next/image";
 import { notFound } from "next/navigation";
@@ -11,7 +11,7 @@ interface PageParams {
 
 export async function generateStaticParams() {
   const posts = await fetchPosts();
-  return posts.map((post: Post) => ({
+  return posts.map((post: ContentProps) => ({
     slug: String(post.slug),
   }));
 }
@@ -39,8 +39,8 @@ export default async function PostPage({ params }: PageParams) {
     return notFound();
   }
   return (
-    <main className="flex items-stretch flex-1">
-      <aside className="relative min-h-svh w-full flex-2">
+    <main className="flex flex-col lg:flex-row items-stretch flex-1">
+      <aside className="sticky top-0 h-96 lg:min-h-svh lg:h-full w-full lg:flex-2">
         <Image
           src={post.feature_image}
           alt={post.feature_image_alt || post.title}
@@ -49,8 +49,8 @@ export default async function PostPage({ params }: PageParams) {
           priority
         />
       </aside>
-      <article className="flex-3 px-12 flex flex-col justify-center">
-        <div className="max-w-3xl my-auto py-12 lg:py-20">
+      <article className="lg:flex-3 px-12 flex flex-col justify-center">
+        <div className="max-w-3xl my-auto py-12">
           <header className="mb-8 border-b">
             <h1 className="text-4xl font-bold mb-4">{post.title}</h1>
             <div className="mb-4 flex items-center justify-between">

@@ -1,5 +1,5 @@
 import { fetchGlobals, fetchPage, fetchRecentPosts } from "@/lib/api/ghost";
-import type { Post } from "@/lib/api/types";
+import type { ContentProps } from "@/lib/api/types";
 import { formatDate } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
@@ -12,13 +12,13 @@ export default async function Home() {
     <main>
       <section className="relative h-[80svh]">
         <Image
-          src={page.feature_image}
-          alt={page.feature_image_alt || page.title}
+          src={globals.cover_image}
+          alt={globals.title}
           fill
-          className="object-cover object-bottom"
+          className="object-cover object-center"
           priority
         />
-        <div className="absolute inset-0 bg-black/50" />
+        <div className="absolute inset-0 bg-gradient-to-t from-gray-950/90 to-transparent" />
         <div className="relative z-10 flex items-center justify-center h-full">
           <h1 className="text-4xl font-bold text-white">{globals.title}</h1>
         </div>
@@ -40,7 +40,7 @@ async function RecentPosts() {
   const posts = await fetchRecentPosts(3);
   return (
     <div className="flex flex-row items-stretch justify-between gap-4">
-      {posts.map((post: Post) => (
+      {posts.map((post: ContentProps) => (
         <div
           key={post.id}
           className="bg-white rounded-lg shadow-md overflow-hidden flex flex-col items-stretch"
@@ -57,10 +57,10 @@ async function RecentPosts() {
             />
           </Link>
           <div className="p-4 flex flex-col justify-between gap-4">
-            <h2 className="text-2xl font-bold mb-2">
+            <h2 className="text-xl font-bold mb-2">
               <Link href={`/posts/${post.slug}`}>{post.title}</Link>
             </h2>
-            <p className="text-gray-600 mb-2">{post.excerpt}...</p>
+            <p className="text-gray-600 text-sm mb-2">{post.excerpt}...</p>
             <div className="flex justify-between items-center">
               <span className="text-gray-600">{post.primary_author.name}</span>
               <span className="text-gray-600">

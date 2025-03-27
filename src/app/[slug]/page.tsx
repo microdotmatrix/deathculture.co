@@ -1,7 +1,7 @@
 import { ContactForm } from "@/components/contact";
 import { Content } from "@/components/ghost/content";
 import { fetchPage, fetchPages } from "@/lib/api/ghost";
-import type { Page } from "@/lib/api/types";
+import type { ContentProps } from "@/lib/api/types";
 import { notFound } from "next/navigation";
 
 interface PageParams {
@@ -13,7 +13,7 @@ export const dynamicParams = true;
 
 export async function generateStaticParams() {
   const pages = await fetchPages();
-  return pages.map((page: Page) => ({
+  return pages.map((page: ContentProps) => ({
     slug: String(page.slug),
   }));
 }
