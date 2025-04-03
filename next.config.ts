@@ -14,6 +14,12 @@ const nextConfig: NextConfig = {
         hostname: "*.ghost.io",
         pathname: "/**",
       },
+      {
+        protocol: "http",
+        hostname: "localhost",
+        pathname: "/**",
+        port: "2368",
+      },
     ],
   },
 };

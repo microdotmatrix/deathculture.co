@@ -237,4 +237,7 @@
   p {
     @apply text-base;
   }
+  main {
+    @apply mt-12;
+  }
 }

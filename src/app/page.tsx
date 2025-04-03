@@ -10,10 +10,10 @@ export default async function Home() {
   const page = await fetchPage("home");
   return (
     <main>
-      <section className="relative h-[80svh]">
+      <section className="relative h-[90svh]">
         <Image
-          src={globals.cover_image}
-          alt={globals.title}
+          src={page.feature_image}
+          alt={page.title}
           fill
           className="object-cover object-center"
           priority

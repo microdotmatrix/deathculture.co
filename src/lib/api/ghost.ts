@@ -8,7 +8,7 @@ export async function ghost({
   params?: Record<string, string>;
 }) {
   const url = new URL(
-    `https://${process.env.GHOST_CONTENT_API_URL}/ghost/api/content/${endpoint}/?key=${process.env.GHOST_CONTENT_API_KEY}`
+    `${process.env.GHOST_CONTENT_API_URL}/ghost/api/content/${endpoint}/?key=${process.env.GHOST_CONTENT_API_KEY}`
   );
   if (params) {
     Object.entries(params).forEach(([key, value]) =>

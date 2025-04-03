@@ -86,7 +86,7 @@ export function Header({ globals }: { globals: Globals }) {
                 [1, 0.9]
               ),
             }}
-            className="flex origin-left items-center text-xl sm:text-2xl lg:text-3xl font-serif font-bold text-white transition-transform ease-in-out duration-200"
+            className="flex origin-left items-center text-xl sm:text-2xl font-serif font-bold text-white transition-transform ease-in-out duration-200"
           >
             <Link href="/">{globals.title}</Link>
           </motion.p>
