@@ -81,6 +81,9 @@
 	--display-weight: 400;
 	--text-family: 'Questrial', 'sans-serif';
 	--text-weight: 400;
+
+	--selection-bg: var(--secondary-300);
+	--selection-text: var(--base-950);
 }
 
 .dark {
@@ -224,7 +227,7 @@
 
 	body {
 		position: relative;
-		font-family: var(--font-body);
+		font-family: var(--font-text);
 		font-size: 1rem;
 		font-weight: 400;
 		-webkit-font-smoothing: antialiased;
