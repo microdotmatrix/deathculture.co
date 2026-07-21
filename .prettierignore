@@ -8,3 +8,9 @@ bun.lockb
 # Miscellaneous
 /static/
 /drizzle/
+
+# Vendored agent skills and reference repos — not project code, some contain
+# diff-marked snippets that prettier cannot parse.
+.agents
+.claude
+.reference

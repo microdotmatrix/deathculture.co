@@ -1,9 +1,15 @@
 <script lang="ts">
+	import { signOut } from '@/lib/auth.remote';
 	import type { User } from 'better-auth';
-	import { signOut } from '#lib/auth.remote';
 	import Logo from './Logo.svelte';
 
-	let { user = null }: { user?: User | null } = $props();
+	interface Props {
+		user?: User | null;
+		/** Tone of the surface behind the header: dark imagery (default) or light page. */
+		tone?: 'dark' | 'light';
+	}
+
+	let { user = null, tone = 'dark' }: Props = $props();
 
 	const navLinks = [
 		{ label: 'Podcast', href: '/podcast' },
@@ -14,7 +20,7 @@
 	];
 </script>
 
-<header class="site-header">
+<header class={['site-header', tone === 'light' && 'on-light']}>
 	<div class="mx-auto grid max-w-6xl grid-cols-[1fr_auto_1fr] items-center gap-4 px-5 pt-4 sm:px-8">
 		<div class="flex justify-start">
 			<a href="/search" class="icon-btn hit-area-extend" aria-label="Search">
@@ -167,5 +173,44 @@
 	.nav-link:hover::after,
 	.nav-link:focus-visible::after {
 		transform: scaleX(1);
+	}
+
+	/* Light-surface variant — dark text, no darkening gradient. */
+	.site-header.on-light {
+		color: var(--base-800);
+		background: linear-gradient(
+			to bottom,
+			oklch(from var(--background) l c h / 0.9),
+			oklch(from var(--background) l c h / 0.5) 60%,
+			transparent
+		);
+	}
+
+	.on-light .icon-btn {
+		color: var(--base-600);
+	}
+
+	.on-light .icon-btn:hover,
+	.on-light .icon-btn:focus-visible {
+		color: var(--base-900);
+		background: oklch(from var(--base-950) l c h / 0.08);
+	}
+
+	.on-light .quiet-link {
+		color: var(--base-600);
+	}
+
+	.on-light .quiet-link:hover,
+	.on-light .quiet-link:focus-visible {
+		color: var(--base-900);
+	}
+
+	.on-light .nav-link {
+		color: var(--base-500);
+	}
+
+	.on-light .nav-link:hover,
+	.on-light .nav-link:focus-visible {
+		color: var(--base-900);
 	}
 </style>

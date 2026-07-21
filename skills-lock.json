@@ -6,6 +6,12 @@
 			"sourceType": "github",
 			"skillPath": "plugins/claude/svelte/skills/svelte-core-bestpractices/SKILL.md",
 			"computedHash": "bec11e369679027edf9d4acbe6d9788f8da33dc14b48b874f231d3ba13705324"
+		},
+		"tiptap": {
+			"source": "ueberdosis/tiptap",
+			"sourceType": "github",
+			"skillPath": "skills/tiptap/SKILL.md",
+			"computedHash": "d3abb7a7e4cb1eb4064e8dcb0928771d58052c7d92e2ec3725a3a9a3c6cd338b"
 		}
 	}
 }

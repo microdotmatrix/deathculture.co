@@ -3,10 +3,6 @@
 	"private": true,
 	"version": "0.0.1",
 	"type": "module",
-	"imports": {
-		"#lib": "./src/lib",
-		"#lib/*": "./src/lib/*"
-	},
 	"scripts": {
 		"dev": "vite dev",
 		"build": "vite build",
@@ -20,10 +16,11 @@
 		"db:generate": "drizzle-kit generate",
 		"db:migrate": "drizzle-kit migrate",
 		"db:studio": "drizzle-kit studio",
-		"auth:schema": "auth generate --config src/lib/server/auth.ts --output src/lib/server/db/auth.schema.ts --yes"
+		"auth:schema": "auth generate --config src/lib/server/auth.ts --output src/lib/server/db/schema/auth.ts --yes"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.5.4",
+		"@iconify/svelte": "^5.2.2",
 		"@neondatabase/serverless": "^1.1.0",
 		"@sveltejs/adapter-vercel": "next",
 		"@sveltejs/kit": "next",
@@ -43,5 +40,17 @@
 		"typescript": "^6.0.3",
 		"vite": "^8.0.16",
 		"zod": "^4.4.3"
+	},
+	"dependencies": {
+		"@tiptap/core": "^3.28.0",
+		"@tiptap/extension-bubble-menu": "^3.28.0",
+		"@tiptap/extensions": "^3.28.0",
+		"@tiptap/html": "^3.28.0",
+		"@tiptap/pm": "^3.28.0",
+		"@tiptap/starter-kit": "^3.28.0",
+		"@uploadthing/svelte": "^7.3.3",
+		"happy-dom": "^20.11.0",
+		"runed": "^0.37.1",
+		"uploadthing": "^7.7.4"
 	}
 }

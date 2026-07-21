@@ -1,15 +1,18 @@
 <script lang="ts">
-	import type { PostPreview } from '#lib/data/posts';
+	import Logo from '@/lib/components/site/Logo.svelte';
+	import type { PostPreview } from '@/lib/types';
 
 	let { post }: { post: PostPreview } = $props();
 </script>
 
 <article class="row grid items-center gap-8 md:grid-cols-2 md:gap-12">
-	<div class="row-copy">
-		<h3>
-			<a href="/posts/{post.slug}">{post.title}</a>
-		</h3>
-		<p class="excerpt">{post.excerpt}</p>
+	<div class="row-copy flex h-full flex-col justify-between">
+		<div class="my-auto">
+			<h3>
+				<a href="/posts/{post.slug}" aria-label={post.title}>{post.title}</a>
+			</h3>
+			<p class="excerpt">{post.excerpt}</p>
+		</div>
 		<p class="meta">
 			<time datetime={post.date}>{post.date}</time>
 			<span aria-hidden="true">·</span>
@@ -17,14 +20,25 @@
 		</p>
 	</div>
 
-	<a class="row-figure" href="/posts/{post.slug}" tabindex="-1" aria-hidden="true">
-		<img
-			src={post.image.src}
-			alt={post.image.alt}
-			width={post.image.width}
-			height={post.image.height}
-			loading="lazy"
-		/>
+	<a
+		class="row-figure"
+		href="/posts/{post.slug}"
+		tabindex="-1"
+		aria-label={post.image?.alt ?? post.title}
+	>
+		{#if post.image}
+			<img
+				src={post.image.src}
+				alt={post.image.alt}
+				width={post.image.width}
+				height={post.image.height}
+				loading="lazy"
+			/>
+		{:else}
+			<div class="row-figure-placeholder" aria-hidden="true">
+				<Logo size={56} />
+			</div>
+		{/if}
 	</a>
 </article>
 
@@ -97,5 +111,24 @@
 	.row:hover .row-figure img {
 		filter: grayscale(0.2) contrast(1.02);
 		transform: scale(1.05);
+	}
+
+	.row-figure-placeholder {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 100%;
+		aspect-ratio: 3 / 2;
+		background:
+			radial-gradient(
+				ellipse at 30% 20%,
+				oklch(from var(--primary-200) l c h / 0.35),
+				transparent 60%
+			),
+			var(--muted);
+	}
+
+	.row-figure-placeholder :global(.logo-mark) {
+		opacity: 0.5;
 	}
 </style>

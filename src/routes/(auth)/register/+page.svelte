@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { signUp } from '#lib/auth.remote';
+	import { signUp } from '@/lib/auth.remote';
 
 	const formIssues = $derived(
 		signUp.fields.allIssues()?.filter((issue) => !issue.path?.length) ?? []

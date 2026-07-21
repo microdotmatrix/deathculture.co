@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { subscribe } from '#lib/newsletter.remote';
+	import { subscribe } from '@/lib/newsletter.remote';
 </script>
 
 <section class="hero" aria-labelledby="hero-heading">
@@ -39,7 +39,11 @@
 							placeholder="james@example.com"
 							autocomplete="email"
 						/>
-						<button disabled={!!subscribe.pending}>
+						<button
+							disabled={!!subscribe.pending}
+							type="submit"
+							aria-label="Subscribe to our newsletter"
+						>
 							{subscribe.pending ? 'Subscribing…' : 'Subscribe'}
 						</button>
 					</form>
@@ -88,7 +92,7 @@
 				oklch(from var(--base-1000) l c h / 0.45) 45%,
 				oklch(from var(--primary-950) l c h / 0.35) 100%
 			),
-			linear-gradient(to top, oklch(from var(--base-1000) l c h / 0.85), transparent 35%);
+			linear-gradient(to top, oklch(from var(--base-1000) l c h / 1), transparent 45%);
 	}
 
 	.content {

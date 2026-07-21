@@ -59,7 +59,7 @@
 	.band-figure {
 		position: relative;
 		overflow: clip;
-		min-height: clamp(16rem, 40vw, 28rem);
+		min-height: clamp(16rem, 40vw, 48rem);
 	}
 
 	.band-figure img {

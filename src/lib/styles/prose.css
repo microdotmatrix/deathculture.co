@@ -1,0 +1,105 @@
+/* Shared long-form typography for post bodies — used by both the public
+   post page and the TipTap editor so writing and reading match. */
+
+.dc-prose {
+	font-family: var(--text-family);
+	font-size: 1.05rem;
+	line-height: 1.75;
+	color: var(--foreground);
+}
+
+.dc-prose > * + * {
+	margin-top: 1.1em;
+}
+
+.dc-prose h2,
+.dc-prose h3,
+.dc-prose h4 {
+	font-family: var(--display-family);
+	line-height: 1.25;
+	text-wrap: balance;
+	margin-top: 1.8em;
+}
+
+.dc-prose h2 {
+	font-size: 1.65em;
+}
+
+.dc-prose h3 {
+	font-size: 1.3em;
+}
+
+.dc-prose h4 {
+	font-size: 1.1em;
+}
+
+.dc-prose a {
+	color: var(--secondary-800);
+	text-decoration: underline;
+	text-decoration-color: var(--secondary-400);
+	text-underline-offset: 0.2em;
+	transition: text-decoration-color var(--duration-fast, 150ms) ease;
+}
+
+.dc-prose a:hover {
+	text-decoration-color: var(--secondary-700);
+}
+
+.dc-prose blockquote {
+	padding-inline-start: 1.25rem;
+	border-inline-start: 3px solid var(--secondary-500);
+	font-style: italic;
+	color: var(--base-600);
+}
+
+.dc-prose ul,
+.dc-prose ol {
+	padding-inline-start: 1.5rem;
+}
+
+.dc-prose ul {
+	list-style: disc;
+}
+
+.dc-prose ol {
+	list-style: decimal;
+}
+
+.dc-prose li + li {
+	margin-top: 0.4em;
+}
+
+.dc-prose hr {
+	margin-block: 2.5rem;
+	border: 0;
+	border-top: 1px dashed var(--border);
+}
+
+.dc-prose code {
+	padding: 0.15em 0.4em;
+	font-size: 0.9em;
+	background: var(--muted);
+	border-radius: var(--radius-sm);
+}
+
+.dc-prose pre {
+	padding: 1rem 1.25rem;
+	overflow-x: auto;
+	background: var(--base-950);
+	color: var(--base-100);
+	border-radius: var(--radius-md);
+}
+
+.dc-prose pre code {
+	padding: 0;
+	background: none;
+	font-size: 0.85em;
+}
+
+.dc-prose strong {
+	font-weight: 700;
+}
+
+.dc-prose > :first-child {
+	margin-top: 0;
+}

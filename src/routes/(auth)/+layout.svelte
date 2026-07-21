@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Logo from '#lib/components/site/Logo.svelte';
+	import Logo from '@/lib/components/site/Logo.svelte';
 	import type { LayoutProps } from './$types';
 
 	let { children }: LayoutProps = $props();

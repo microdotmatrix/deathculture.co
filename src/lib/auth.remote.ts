@@ -1,8 +1,8 @@
 import { form, getRequestEvent } from '$app/server';
+import { auth } from '@/lib/server/auth';
 import { invalid, redirect } from '@sveltejs/kit';
 import { APIError } from 'better-auth/api';
 import { z } from 'zod';
-import { auth } from '#lib/server/auth';
 
 const email = z.email('Enter a valid email address');
 // Leading underscore keeps the value out of the response if validation fails.

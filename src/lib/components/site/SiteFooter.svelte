@@ -1,4 +1,6 @@
 <script lang="ts">
+	import Icon from '@iconify/svelte';
+
 	const year = new Date().getFullYear();
 </script>
 
@@ -13,6 +15,7 @@
 			</ul>
 		</nav>
 		<p class="copyright">© DeathCulture.co {year}</p>
+		<Icon icon="mdi:github" class="text-2xl" />
 	</div>
 </footer>
 

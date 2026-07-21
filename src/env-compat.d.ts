@@ -5,4 +5,5 @@ declare module '$env/static/private' {
 	export const DATABASE_URL: string;
 	export const ORIGIN: string;
 	export const BETTER_AUTH_SECRET: string;
+	export const UPLOADTHING_TOKEN: string;
 }

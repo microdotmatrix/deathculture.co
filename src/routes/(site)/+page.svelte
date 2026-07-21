@@ -1,8 +1,10 @@
 <script lang="ts">
-	import Hero from '#lib/components/landing/Hero.svelte';
-	import FeatureBand from '#lib/components/landing/FeatureBand.svelte';
-	import ArticleRow from '#lib/components/landing/ArticleRow.svelte';
-	import { latestPosts } from '#lib/data/posts';
+	import ArticleRow from '@/lib/components/landing/ArticleRow.svelte';
+	import FeatureBand from '@/lib/components/landing/FeatureBand.svelte';
+	import Hero from '@/lib/components/landing/Hero.svelte';
+	import type { PageProps } from './$types';
+
+	let { data }: PageProps = $props();
 
 	const features = [
 		{
@@ -68,20 +70,26 @@
 	{/each}
 </section>
 
-<section class="journal" aria-labelledby="journal-heading">
-	<div class="mx-auto max-w-6xl px-5 sm:px-8">
-		<header class="journal-header">
-			<p class="kicker">The Journal</p>
-			<h2 id="journal-heading">Latest posts</h2>
-		</header>
+{#if data.latestPosts.length > 0}
+	<section class="journal" aria-labelledby="journal-heading">
+		<div class="mx-auto max-w-6xl px-5 sm:px-8">
+			<header class="journal-header">
+				<p class="kicker">The Journal</p>
+				<h2 id="journal-heading">Latest posts</h2>
+			</header>
 
-		<div class="article-list">
-			{#each latestPosts as post (post.slug)}
-				<ArticleRow {post} />
-			{/each}
+			<div class="article-list">
+				{#each data.latestPosts as post (post.slug)}
+					<ArticleRow {post} />
+				{/each}
+			</div>
+
+			<p class="journal-more">
+				<a href="/posts">All posts &rarr;</a>
+			</p>
 		</div>
-	</div>
-</section>
+	</section>
+{/if}
 
 <style>
 	.journal {
@@ -109,5 +117,22 @@
 
 	.article-list :global(article + article) {
 		border-top: 1px dashed var(--border);
+	}
+
+	.journal-more {
+		padding-block: 1.5rem 0.5rem;
+		border-top: 1px dashed var(--border);
+	}
+
+	.journal-more a {
+		font-size: 0.85rem;
+		letter-spacing: 0.04em;
+		color: var(--secondary-800);
+		transition: color var(--duration-fast, 150ms) ease;
+	}
+
+	.journal-more a:hover,
+	.journal-more a:focus-visible {
+		color: var(--secondary-600);
 	}
 </style>
