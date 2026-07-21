@@ -8,11 +8,15 @@
 		comments: CommentView[];
 		memberName: string | null;
 		guestName: string | null;
+		commentsEnabled: boolean;
+		/** False when an admin has switched off commenting for this member. */
+		canComment: boolean;
 	}
 
-	let { postId, comments, memberName, guestName }: Props = $props();
+	let { postId, comments, memberName, guestName, commentsEnabled, canComment }: Props = $props();
 
 	const expiredVerifyLink = $derived(page.url.searchParams.get('comment') === 'expired');
+	const disabledVerifyLink = $derived(page.url.searchParams.get('comment') === 'disabled');
 
 	const dateFormat = new Intl.DateTimeFormat('en-GB', {
 		day: 'numeric',
@@ -34,6 +38,13 @@
 	{#if expiredVerifyLink}
 		<p class="notice" role="alert">
 			That confirmation link expired. Submit your comment again and we'll send a fresh one.
+		</p>
+	{/if}
+
+	{#if disabledVerifyLink}
+		<p class="notice" role="alert">
+			Comments were closed on this post before your confirmation arrived, so your comment wasn't
+			published.
 		</p>
 	{/if}
 
@@ -61,9 +72,15 @@
 		</ol>
 	{/if}
 
-	<div class="comment-form-wrap">
-		<CommentForm {postId} {memberName} {guestName} />
-	</div>
+	{#if !commentsEnabled}
+		<p class="closed-notice" role="status">Comments are closed on this post.</p>
+	{:else if memberName && !canComment}
+		<p class="closed-notice" role="status">You're currently not able to comment.</p>
+	{:else}
+		<div class="comment-form-wrap">
+			<CommentForm {postId} {memberName} {guestName} />
+		</div>
+	{/if}
 </section>
 
 <style>
@@ -106,6 +123,14 @@
 		flex-direction: column;
 		gap: 1.5rem;
 		margin-bottom: 2.5rem;
+	}
+
+	.closed-notice {
+		padding: 0.9rem 1.25rem;
+		font-size: 0.88rem;
+		color: var(--muted-foreground);
+		border: 1px dashed var(--border);
+		border-radius: var(--radius-md);
 	}
 
 	.comment {

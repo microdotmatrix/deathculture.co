@@ -82,6 +82,8 @@
 				comments={data.comments}
 				memberName={data.memberName}
 				guestName={data.guestName}
+				commentsEnabled={post.commentsEnabled}
+				canComment={data.canComment}
 			/>
 		</div>
 	</div>

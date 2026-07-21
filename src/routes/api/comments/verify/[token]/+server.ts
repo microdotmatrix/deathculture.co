@@ -15,7 +15,7 @@ export const GET: RequestHandler = async ({ params, cookies }) => {
 	const row = token
 		? await db.query.comment.findFirst({
 				where: eq(comment.verifyToken, token),
-				with: { post: { columns: { slug: true } } }
+				with: { post: { columns: { slug: true, commentsEnabled: true } } }
 			})
 		: undefined;
 
@@ -25,6 +25,11 @@ export const GET: RequestHandler = async ({ params, cookies }) => {
 
 	if (!row.verifyTokenExpiresAt || row.verifyTokenExpiresAt < new Date()) {
 		redirect(303, `/posts/${row.post.slug}?comment=expired#comments`);
+	}
+
+	// Comments may have been switched off after this link was emailed.
+	if (!row.post.commentsEnabled) {
+		redirect(303, `/posts/${row.post.slug}?comment=disabled#comments`);
 	}
 
 	await db.batch([

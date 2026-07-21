@@ -20,7 +20,8 @@ const savePostSchema = z.object({
 	featureImage: z.union([z.url(), z.literal('')]),
 	featureImageAlt: z.string().max(300),
 	tags: z.array(z.string().min(1).max(50)).max(MAX_TAGS),
-	status: z.enum(['draft', 'published'])
+	status: z.enum(['draft', 'published']),
+	commentsEnabled: z.boolean()
 });
 
 export const savePost = command(savePostSchema, async (data) => {
@@ -59,7 +60,8 @@ export const savePost = command(savePostSchema, async (data) => {
 		featureImage: data.featureImage || null,
 		featureImageAlt: data.featureImageAlt.trim() || null,
 		status: data.status,
-		publishedAt: publishedAt ?? null
+		publishedAt: publishedAt ?? null,
+		commentsEnabled: data.commentsEnabled
 	};
 
 	if (existing) {

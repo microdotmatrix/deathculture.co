@@ -26,7 +26,8 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 		featureImage: row.featureImage ?? '',
 		featureImageAlt: row.featureImageAlt ?? '',
 		status: row.status,
-		tags: row.tags.map(({ tag }) => tag.name)
+		tags: row.tags.map(({ tag }) => tag.name),
+		commentsEnabled: row.commentsEnabled
 	};
 
 	return { post: editorPost };

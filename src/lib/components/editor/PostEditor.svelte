@@ -5,6 +5,7 @@
 	import TagInput from '@/lib/components/editor/TagInput.svelte';
 	import Tiptap from '@/lib/components/editor/Tiptap.svelte';
 	import Logo from '@/lib/components/site/Logo.svelte';
+	import ToggleSwitch from '@/lib/components/ui/ToggleSwitch.svelte';
 	import type { EditorPost } from '@/lib/types';
 	import type { JSONContent } from '@tiptap/core';
 
@@ -26,6 +27,7 @@
 	let featureImageAlt = $state(initial?.featureImageAlt ?? '');
 	let tags = $state(initial?.tags ?? []);
 	let status = $state<'draft' | 'published'>(initial?.status ?? 'draft');
+	let commentsEnabled = $state(initial?.commentsEnabled ?? true);
 
 	let dirty = $state(false);
 	let saving = $state(false);
@@ -49,7 +51,8 @@
 				featureImage,
 				featureImageAlt,
 				tags,
-				status: nextStatus
+				status: nextStatus,
+				commentsEnabled
 			});
 
 			status = result.status;
@@ -266,6 +269,22 @@
 						}
 					}
 				/>
+			</section>
+
+			<section class="field">
+				<h3 class="field-label">Discussion</h3>
+				<ToggleSwitch
+					checked={commentsEnabled}
+					label="Comments enabled"
+					onchange={(next) => {
+						commentsEnabled = next;
+						dirty = true;
+					}}
+				/>
+				<p class="field-hint">
+					When off, the comment form is hidden and new comments are rejected. Existing comments stay
+					visible.
+				</p>
 			</section>
 
 			{#if postId}
@@ -500,6 +519,13 @@
 
 	.slug-prefix {
 		font-size: 0.8rem;
+		color: var(--muted-foreground);
+	}
+
+	.field-hint {
+		margin-top: 0.5rem;
+		font-size: 0.75rem;
+		line-height: 1.5;
 		color: var(--muted-foreground);
 	}
 

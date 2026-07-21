@@ -1,5 +1,5 @@
-import { form, getRequestEvent } from '$app/server';
-import { readCommenterCookie } from '@/lib/server/commenter-cookie';
+import { form } from '$app/server';
+import { resolveViewerIdentity } from '@/lib/server/comment-identity';
 import { db } from '@/lib/server/db';
 import { comment, commenter, post } from '@/lib/server/db/schema';
 import { sendCommentVerificationEmail } from '@/lib/server/email';
@@ -25,26 +25,28 @@ const commentSchema = z.object({
 });
 
 export const submitComment = form(commentSchema, async (data, issue) => {
-	const { locals, cookies } = getRequestEvent();
-
 	// Bots that fill the honeypot get a quiet, convincing no-op.
 	if (data.website) return { status: 'published' as const };
 
 	const target = await db.query.post.findFirst({
-		columns: { id: true, title: true, slug: true },
+		columns: { id: true, title: true, slug: true, commentsEnabled: true },
 		where: and(eq(post.id, data.postId), eq(post.status, 'published'))
 	});
 
 	if (!target) error(404, 'Post not found');
+	if (!target.commentsEnabled) error(403, 'Comments are closed on this post');
 
 	const body = data.body.trim();
+	const viewer = await resolveViewerIdentity();
 
-	// Members comment instantly.
-	if (locals.user) {
+	// Members comment instantly — unless commenting was switched off for them.
+	if (viewer.type === 'member') {
+		if (!viewer.canComment) error(403, "You're not able to comment right now");
+
 		await db.insert(comment).values({
 			id: randomUUID(),
 			postId: target.id,
-			userId: locals.user.id,
+			userId: viewer.userId,
 			body,
 			status: 'published'
 		});
@@ -53,24 +55,16 @@ export const submitComment = form(commentSchema, async (data, issue) => {
 	}
 
 	// Guests who verified before carry a signed cookie.
-	const cookieId = readCommenterCookie(cookies);
-	if (cookieId) {
-		const known = await db.query.commenter.findFirst({
-			columns: { id: true, verifiedAt: true },
-			where: eq(commenter.id, cookieId)
+	if (viewer.type === 'guest') {
+		await db.insert(comment).values({
+			id: randomUUID(),
+			postId: target.id,
+			commenterId: viewer.commenterId,
+			body,
+			status: 'published'
 		});
 
-		if (known?.verifiedAt) {
-			await db.insert(comment).values({
-				id: randomUUID(),
-				postId: target.id,
-				commenterId: known.id,
-				body,
-				status: 'published'
-			});
-
-			return { status: 'published' as const };
-		}
+		return { status: 'published' as const };
 	}
 
 	// First-time guest: hold the comment until the emailed link is clicked.

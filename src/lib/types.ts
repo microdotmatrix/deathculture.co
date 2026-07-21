@@ -25,6 +25,7 @@ export interface EditorPost {
 	featureImageAlt: string;
 	status: 'draft' | 'published';
 	tags: string[];
+	commentsEnabled: boolean;
 }
 
 export interface CommentView {

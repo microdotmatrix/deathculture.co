@@ -111,6 +111,7 @@ export async function getPublishedPostBySlug(slug: string) {
 		featureImage: row.featureImage,
 		featureImageAlt: row.featureImageAlt ?? row.title,
 		publishedAt: row.publishedAt ?? row.createdAt,
+		commentsEnabled: row.commentsEnabled,
 		date: formatPostDate(row.publishedAt ?? row.createdAt),
 		readingTime: readingTime(row.contentHtml),
 		author: { name: row.author.name, image: row.author.image },
