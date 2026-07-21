@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { tick } from 'svelte';
+	import { MediaQuery } from 'svelte/reactivity';
 	import { goto, replaceState } from '$app/navigation';
 	import { deletePost, savePost } from '@/lib/blog.remote';
 	import FeatureImageUpload from '@/lib/components/editor/FeatureImageUpload.svelte';
@@ -33,7 +35,48 @@
 	let saving = $state(false);
 	let savedFlash = $state(false);
 	let errorMessage = $state('');
-	let sidebarOpen = $state(false);
+
+	// Settings panel: a persistent framing column on wide screens (docked), and an
+	// overlay flyout on mobile. The two states are tracked separately so the initial
+	// server render paints correctly on both viewports — desktop docked-open by
+	// default, mobile overlay-closed — without needing to know the viewport at SSR.
+	const SETTINGS_STORAGE_KEY = 'postEditor:settingsOpen';
+
+	// Reactive, SSR-safe media query (false on the server → wide-screen layout paints first).
+	const mobile = new MediaQuery('max-width: 1023px');
+
+	let dockedOpen = $state(true); // wide-screen column; remembered in localStorage
+	let overlayOpen = $state(false); // mobile flyout; always starts closed
+	let shellReady = $state(false); // gates transitions so the first paint doesn't animate
+
+	// Whichever state is active for the current viewport.
+	let settingsShown = $derived(mobile.current ? overlayOpen : dockedOpen);
+
+	// One-time client init: restore the remembered docked preference, then enable
+	// transitions only after that corrected state has painted (no load-time animation).
+	$effect(() => {
+		const stored = localStorage.getItem(SETTINGS_STORAGE_KEY);
+		if (stored !== null) dockedOpen = stored === 'true';
+		tick().then(() => (shellReady = true));
+	});
+
+	function toggleSettings() {
+		if (mobile.current) {
+			overlayOpen = !overlayOpen;
+			return;
+		}
+		dockedOpen = !dockedOpen;
+		localStorage.setItem(SETTINGS_STORAGE_KEY, String(dockedOpen));
+	}
+
+	function closeSettings() {
+		if (mobile.current) {
+			overlayOpen = false;
+			return;
+		}
+		dockedOpen = false;
+		localStorage.setItem(SETTINGS_STORAGE_KEY, 'false');
+	}
 
 	async function save(nextStatus: 'draft' | 'published' = status) {
 		if (saving) return;
@@ -114,7 +157,14 @@
 	<title>{title ? `${title} — Editor` : 'New post — Editor'} — DeathCulture.co</title>
 </svelte:head>
 
-<div class="editor-page min-h-svh">
+<div
+	class={[
+		'editor-page',
+		dockedOpen && 'docked-open',
+		overlayOpen && 'overlay-open',
+		shellReady && 'is-ready'
+	]}
+>
 	<header class="editor-bar">
 		<div class="flex items-center gap-3">
 			<a href="/dashboard" class="back-link" aria-label="Back to Studio">
@@ -159,9 +209,9 @@
 			<button
 				type="button"
 				class="quiet-action"
-				aria-expanded={sidebarOpen}
+				aria-expanded={settingsShown}
 				aria-controls="post-settings"
-				onclick={() => (sidebarOpen = !sidebarOpen)}
+				onclick={toggleSettings}
 			>
 				Settings
 			</button>
@@ -169,35 +219,37 @@
 	</header>
 
 	<main class="editor-canvas">
-		<textarea
-			class="title-input"
-			rows="1"
-			placeholder="Post title"
-			maxlength="300"
-			{@attach autogrow}
-			bind:value={title}
-			oninput={() => (dirty = true)}
-			onkeydown={(event) => {
-				if (event.key === 'Enter') event.preventDefault();
-			}}></textarea>
+		<div class="canvas-inner">
+			<textarea
+				class="title-input"
+				rows="1"
+				placeholder="Post title"
+				maxlength="300"
+				{@attach autogrow}
+				bind:value={title}
+				oninput={() => (dirty = true)}
+				onkeydown={(event) => {
+					if (event.key === 'Enter') event.preventDefault();
+				}}></textarea>
 
-		<Tiptap
-			initialContent={initial?.content ?? null}
-			onUpdate={(next) => {
-				doc = next;
-				dirty = true;
-			}}
-		/>
+			<Tiptap
+				initialContent={initial?.content ?? null}
+				onUpdate={(next) => {
+					doc = next;
+					dirty = true;
+				}}
+			/>
+		</div>
 	</main>
 
-	<aside id="post-settings" class={['settings', sidebarOpen && 'open']} aria-label="Post settings">
+	<aside id="post-settings" class="settings" aria-label="Post settings" inert={!settingsShown}>
 		<div class="settings-header">
 			<h2>Post settings</h2>
 			<button
 				type="button"
-				class="quiet-action"
-				aria-label="Close settings"
-				onclick={() => (sidebarOpen = false)}>&times;</button
+				class="quiet-action collapse-btn"
+				aria-label="Hide settings panel"
+				onclick={closeSettings}>&times;</button
 			>
 		</div>
 
@@ -295,24 +347,35 @@
 		</div>
 	</aside>
 
-	{#if sidebarOpen}
-		<button
-			type="button"
-			class="backdrop"
-			aria-label="Close settings"
-			onclick={() => (sidebarOpen = false)}
+	{#if mobile.current && overlayOpen}
+		<button type="button" class="backdrop" aria-label="Close settings" onclick={closeSettings}
 		></button>
 	{/if}
 </div>
 
 <style>
 	.editor-page {
+		--settings-width: 22rem;
+		display: grid;
+		grid-template-columns: 1fr 0px;
+		grid-template-rows: auto minmax(0, 1fr);
+		grid-template-areas:
+			'bar bar'
+			'canvas settings';
+		height: 100svh;
 		background: var(--background);
 	}
 
+	.editor-page.docked-open {
+		grid-template-columns: 1fr var(--settings-width);
+	}
+
+	.editor-page.is-ready {
+		transition: grid-template-columns var(--duration-normal, 300ms) var(--ease-out-expo, ease);
+	}
+
 	.editor-bar {
-		position: sticky;
-		top: 0;
+		grid-area: bar;
 		z-index: 30;
 		display: flex;
 		align-items: center;
@@ -406,6 +469,12 @@
 	}
 
 	.editor-canvas {
+		grid-area: canvas;
+		min-width: 0;
+		overflow-y: auto;
+	}
+
+	.canvas-inner {
 		max-width: 46rem;
 		margin-inline: auto;
 		padding: clamp(2rem, 6vw, 4rem) 1.25rem 6rem;
@@ -429,29 +498,25 @@
 	}
 
 	.settings {
-		position: fixed;
-		inset-block: 0;
-		right: 0;
-		z-index: 50;
+		grid-area: settings;
 		display: flex;
 		flex-direction: column;
-		width: min(22rem, 100vw);
+		min-width: 0;
+		overflow: hidden;
 		background: var(--background);
-		border-left: 1px solid var(--border);
-		box-shadow: -24px 0 48px -32px oklch(from var(--base-950) l c h / 0.25);
-		transform: translateX(100%);
-		visibility: hidden;
-		transition:
-			transform var(--duration-normal, 300ms) var(--ease-out-expo, ease),
-			visibility 0s var(--duration-normal, 300ms);
+		border-left: 1px solid transparent;
 	}
 
-	.settings.open {
-		transform: translateX(0);
-		visibility: visible;
-		transition:
-			transform var(--duration-normal, 300ms) var(--ease-out-expo, ease),
-			visibility 0s;
+	.editor-page.docked-open .settings {
+		border-left-color: var(--border);
+	}
+
+	/* Fixed intrinsic width so the panel contents reveal/hide cleanly as the grid
+	   column animates between 0 and --settings-width, rather than reflowing text. */
+	.settings-header,
+	.settings-body {
+		width: var(--settings-width);
+		box-sizing: border-box;
 	}
 
 	.settings-header {
@@ -556,9 +621,49 @@
 		background: oklch(from var(--base-950) l c h / 0.3);
 	}
 
-	@media (min-width: 1100px) {
-		.backdrop {
-			display: none;
+	/* Below the breakpoint the settings revert to an overlay flyout above the canvas. */
+	@media (max-width: 1023px) {
+		.editor-page,
+		.editor-page.docked-open {
+			grid-template-columns: 1fr;
+			grid-template-areas:
+				'bar'
+				'canvas';
+		}
+
+		.settings {
+			position: fixed;
+			inset-block: 0;
+			right: 0;
+			z-index: 50;
+			width: min(var(--settings-width), 100vw);
+			border-left: 1px solid var(--border);
+			box-shadow: -24px 0 48px -32px oklch(from var(--base-950) l c h / 0.25);
+			transform: translateX(100%);
+			visibility: hidden;
+			transition:
+				transform var(--duration-normal, 300ms) var(--ease-out-expo, ease),
+				visibility 0s var(--duration-normal, 300ms);
+		}
+
+		.editor-page.overlay-open .settings {
+			transform: translateX(0);
+			visibility: visible;
+			transition:
+				transform var(--duration-normal, 300ms) var(--ease-out-expo, ease),
+				visibility 0s;
+		}
+
+		.settings-header,
+		.settings-body {
+			width: 100%;
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.editor-page.is-ready,
+		.settings {
+			transition: none;
 		}
 	}
 </style>
