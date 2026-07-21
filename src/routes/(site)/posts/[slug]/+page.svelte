@@ -84,6 +84,7 @@
 				guestName={data.guestName}
 				commentsEnabled={post.commentsEnabled}
 				canComment={data.canComment}
+				canLike={data.canLike}
 			/>
 		</div>
 	</div>

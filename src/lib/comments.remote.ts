@@ -1,7 +1,7 @@
-import { form } from '$app/server';
+import { command, form } from '$app/server';
 import { resolveViewerIdentity } from '@/lib/server/comment-identity';
 import { db } from '@/lib/server/db';
-import { comment, commenter, post } from '@/lib/server/db/schema';
+import { comment, commentLike, commenter, post } from '@/lib/server/db/schema';
 import { sendCommentVerificationEmail } from '@/lib/server/email';
 import { error, invalid } from '@sveltejs/kit';
 import { and, eq } from 'drizzle-orm';
@@ -115,6 +115,51 @@ export const submitComment = form(commentSchema, async (data, issue) => {
 
 	return { status: 'pending' as const };
 });
+
+/** One like per identity, toggled — members and verified guests only. */
+export const toggleCommentLike = command(
+	z.object({ commentId: z.string() }),
+	async ({ commentId }) => {
+		const viewer = await resolveViewerIdentity();
+		if (viewer.type === 'anonymous') {
+			error(401, 'Sign in or verify your email to like comments');
+		}
+
+		const target = await db.query.comment.findFirst({
+			columns: { id: true },
+			where: and(eq(comment.id, commentId), eq(comment.status, 'published'))
+		});
+		if (!target) error(404, 'Comment not found');
+
+		const identityFilter =
+			viewer.type === 'member'
+				? and(eq(commentLike.commentId, commentId), eq(commentLike.userId, viewer.userId))
+				: and(eq(commentLike.commentId, commentId), eq(commentLike.commenterId, viewer.commenterId));
+
+		const existing = await db.query.commentLike.findFirst({
+			columns: { id: true },
+			where: identityFilter
+		});
+
+		if (existing) {
+			await db.delete(commentLike).where(eq(commentLike.id, existing.id));
+			return { liked: false };
+		}
+
+		await db
+			.insert(commentLike)
+			.values({
+				id: randomUUID(),
+				commentId,
+				userId: viewer.type === 'member' ? viewer.userId : null,
+				commenterId: viewer.type === 'guest' ? viewer.commenterId : null
+			})
+			// The partial unique indexes make double-submits a no-op.
+			.onConflictDoNothing();
+
+		return { liked: true };
+	}
+);
 
 /**
  * Validates a reply target and flattens reply-to-reply onto the top-level

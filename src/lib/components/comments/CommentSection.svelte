@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import CommentForm from '@/lib/components/comments/CommentForm.svelte';
+	import CommentLikeButton from '@/lib/components/comments/CommentLikeButton.svelte';
 	import type { CommentView } from '@/lib/types';
 
 	interface Props {
@@ -11,9 +12,19 @@
 		commentsEnabled: boolean;
 		/** False when an admin has switched off commenting for this member. */
 		canComment: boolean;
+		/** True for members and verified guests — the identities we can dedupe. */
+		canLike: boolean;
 	}
 
-	let { postId, comments, memberName, guestName, commentsEnabled, canComment }: Props = $props();
+	let {
+		postId,
+		comments,
+		memberName,
+		guestName,
+		commentsEnabled,
+		canComment,
+		canLike
+	}: Props = $props();
 
 	let replyingToId = $state<string | null>(null);
 
@@ -49,8 +60,14 @@
 			</time>
 		</p>
 		<p class="comment-body">{item.body}</p>
-		{#if canWrite}
-			<div class="comment-actions">
+		<div class="comment-actions">
+			<CommentLikeButton
+				commentId={item.id}
+				likeCount={item.likeCount}
+				likedByMe={item.likedByMe}
+				{canLike}
+			/>
+			{#if canWrite}
 				<button
 					type="button"
 					class="reply-btn"
@@ -59,8 +76,8 @@
 				>
 					Reply
 				</button>
-			</div>
-		{/if}
+			{/if}
+		</div>
 	</div>
 {/snippet}
 
@@ -290,7 +307,8 @@
 
 	.comment-actions {
 		display: flex;
-		gap: 0.75rem;
+		align-items: center;
+		gap: 1rem;
 		margin-top: 0.5rem;
 	}
 

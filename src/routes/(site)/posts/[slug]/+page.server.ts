@@ -16,6 +16,7 @@ export const load: PageServerLoad = async ({ params }) => {
 		comments,
 		memberName: viewer.type === 'member' ? viewer.name : null,
 		guestName: viewer.type === 'guest' ? viewer.name : null,
-		canComment: viewer.type === 'member' ? viewer.canComment : true
+		canComment: viewer.type === 'member' ? viewer.canComment : true,
+		canLike: viewer.type !== 'anonymous'
 	};
 };
