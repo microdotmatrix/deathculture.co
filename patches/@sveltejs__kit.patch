@@ -1,0 +1,13 @@
+diff --git a/src/exports/vite/utils.js b/src/exports/vite/utils.js
+index 320a176efdeed1646097445d884460540ab09c00..a0839bb4ab2e1711ed25c1e499ce3f3b1c8285f2 100644
+--- a/src/exports/vite/utils.js
++++ b/src/exports/vite/utils.js
+@@ -150,7 +150,7 @@ export function normalize_id(id, aliases, cwd) {
+ 	return posixify(id);
+ }
+ 
+-export const remote_module_pattern = /[/.]remote(\.[^/]+)+$/;
++export const remote_module_pattern = /\.remote(\.[^/]+)+$/;
+ export const server_only_module_pattern = /[/.]server(\.[^/]+)+$/;
+ export const server_only_directory_pattern = /\/server\//;
+ 
