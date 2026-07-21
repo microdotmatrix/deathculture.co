@@ -1,5 +1,7 @@
 <script lang="ts">
+	import { invalidateAll } from '$app/navigation';
 	import { page } from '$app/state';
+	import { togglePin } from '@/lib/comments-admin.remote';
 	import CommentForm from '@/lib/components/comments/CommentForm.svelte';
 	import CommentLikeButton from '@/lib/components/comments/CommentLikeButton.svelte';
 	import type { CommentView } from '@/lib/types';
@@ -27,6 +29,20 @@
 	}: Props = $props();
 
 	let replyingToId = $state<string | null>(null);
+	let pinBusy = $state(false);
+
+	const isAdmin = $derived(page.data.user?.role === 'admin');
+
+	async function handleTogglePin(commentId: string) {
+		if (pinBusy) return;
+		pinBusy = true;
+		try {
+			await togglePin(commentId);
+			await invalidateAll();
+		} finally {
+			pinBusy = false;
+		}
+	}
 
 	const expiredVerifyLink = $derived(page.url.searchParams.get('comment') === 'expired');
 	const disabledVerifyLink = $derived(page.url.searchParams.get('comment') === 'disabled');
@@ -75,6 +91,16 @@
 					onclick={() => (replyingToId = replyingToId === threadId ? null : threadId)}
 				>
 					Reply
+				</button>
+			{/if}
+			{#if isAdmin && item.id === threadId}
+				<button
+					type="button"
+					class="reply-btn"
+					disabled={pinBusy}
+					onclick={() => handleTogglePin(item.id)}
+				>
+					{item.pinned ? 'Unpin' : 'Pin'}
 				</button>
 			{/if}
 		</div>
