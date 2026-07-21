@@ -134,7 +134,10 @@ export const toggleCommentLike = command(
 		const identityFilter =
 			viewer.type === 'member'
 				? and(eq(commentLike.commentId, commentId), eq(commentLike.userId, viewer.userId))
-				: and(eq(commentLike.commentId, commentId), eq(commentLike.commenterId, viewer.commenterId));
+				: and(
+						eq(commentLike.commentId, commentId),
+						eq(commentLike.commenterId, viewer.commenterId)
+					);
 
 		const existing = await db.query.commentLike.findFirst({
 			columns: { id: true },

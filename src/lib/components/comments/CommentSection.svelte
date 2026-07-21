@@ -18,15 +18,8 @@
 		canLike: boolean;
 	}
 
-	let {
-		postId,
-		comments,
-		memberName,
-		guestName,
-		commentsEnabled,
-		canComment,
-		canLike
-	}: Props = $props();
+	let { postId, comments, memberName, guestName, commentsEnabled, canComment, canLike }: Props =
+		$props();
 
 	let replyingToId = $state<string | null>(null);
 	let pinBusy = $state(false);
@@ -47,9 +40,7 @@
 	const expiredVerifyLink = $derived(page.url.searchParams.get('comment') === 'expired');
 	const disabledVerifyLink = $derived(page.url.searchParams.get('comment') === 'disabled');
 	const canWrite = $derived(commentsEnabled && !(memberName !== null && !canComment));
-	const totalCount = $derived(
-		comments.reduce((count, item) => count + 1 + item.replies.length, 0)
-	);
+	const totalCount = $derived(comments.reduce((count, item) => count + 1 + item.replies.length, 0));
 
 	const dateFormat = new Intl.DateTimeFormat('en-GB', {
 		day: 'numeric',
