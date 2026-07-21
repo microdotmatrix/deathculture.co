@@ -2,11 +2,13 @@
 	interface Props {
 		checked: boolean;
 		label: string;
+		/** Keeps the label for assistive tech but hides it visually. */
+		hideLabel?: boolean;
 		disabled?: boolean;
 		onchange: (next: boolean) => void;
 	}
 
-	let { checked, label, disabled = false, onchange }: Props = $props();
+	let { checked, label, hideLabel = false, disabled = false, onchange }: Props = $props();
 </script>
 
 <label class={['toggle-switch', disabled && 'disabled']}>
@@ -18,7 +20,7 @@
 		onchange={(event) => onchange(event.currentTarget.checked)}
 	/>
 	<span class="track" aria-hidden="true"><span class="thumb"></span></span>
-	<span class="toggle-label">{label}</span>
+	<span class={['toggle-label', hideLabel && 'sr-only']}>{label}</span>
 </label>
 
 <style>
@@ -80,5 +82,13 @@
 	.toggle-label {
 		font-size: 0.85rem;
 		color: var(--foreground);
+	}
+
+	.toggle-label.sr-only {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		overflow: hidden;
+		clip-path: inset(50%);
 	}
 </style>
