@@ -21,7 +21,8 @@
 	let { postId, comments, memberName, guestName, commentsEnabled, canComment, canLike }: Props =
 		$props();
 
-	let replyingToId = $state<string | null>(null);
+	/** The comment whose Reply button was clicked; replies attach to its thread. */
+	let replying = $state<{ threadId: string; commentId: string; author: string } | null>(null);
 	let pinBusy = $state(false);
 
 	const isAdmin = $derived(page.data.user?.role === 'admin');
@@ -78,8 +79,12 @@
 				<button
 					type="button"
 					class="reply-btn"
-					aria-expanded={replyingToId === threadId}
-					onclick={() => (replyingToId = replyingToId === threadId ? null : threadId)}
+					aria-expanded={replying?.commentId === item.id}
+					onclick={() =>
+						(replying =
+							replying?.commentId === item.id
+								? null
+								: { threadId, commentId: item.id, author: item.authorName })}
 				>
 					Reply
 				</button>
@@ -139,15 +144,15 @@
 						</ol>
 					{/if}
 
-					{#if replyingToId === item.id}
+					{#if replying?.threadId === item.id}
 						<div class="reply-composer">
 							<CommentForm
 								{postId}
 								{memberName}
 								{guestName}
 								parentId={item.id}
-								replyingTo={item.authorName}
-								onDone={() => (replyingToId = null)}
+								replyingTo={replying.author}
+								onDone={() => (replying = null)}
 							/>
 						</div>
 					{/if}

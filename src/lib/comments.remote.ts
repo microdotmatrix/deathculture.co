@@ -4,13 +4,15 @@ import { db } from '@/lib/server/db';
 import { comment, commentLike, commenter, post } from '@/lib/server/db/schema';
 import { sendCommentVerificationEmail } from '@/lib/server/email';
 import { error, invalid } from '@sveltejs/kit';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, gt } from 'drizzle-orm';
 import { randomBytes, randomUUID } from 'node:crypto';
 import { z } from 'zod';
 // $env/static/private: auth CLI cannot resolve $app/env/private yet (alias collision).
 import { ORIGIN } from '$env/static/private';
 
 const VERIFY_TOKEN_TTL_MS = 1000 * 60 * 60 * 24; // 24 hours
+const PENDING_WINDOW_MS = 1000 * 60 * 60; // 1 hour
+const MAX_PENDING_PER_WINDOW = 3;
 
 const commentSchema = z.object({
 	postId: z.string(),
@@ -91,6 +93,20 @@ export const submitComment = form(commentSchema, async (data, issue) => {
 		const id = randomUUID();
 		await db.insert(commenter).values({ id, email, name });
 		guest = { id };
+	}
+
+	// Caps verification emails per address so the endpoint can't be used to
+	// email-bomb someone else's inbox.
+	const recentPending = await db.$count(
+		comment,
+		and(
+			eq(comment.commenterId, guest.id),
+			eq(comment.status, 'pending'),
+			gt(comment.createdAt, new Date(Date.now() - PENDING_WINDOW_MS))
+		)
+	);
+	if (recentPending >= MAX_PENDING_PER_WINDOW) {
+		error(429, 'Too many comment attempts for this email address — please try again later');
 	}
 
 	const token = randomBytes(32).toString('base64url');
