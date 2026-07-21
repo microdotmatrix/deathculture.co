@@ -7,12 +7,26 @@
 		memberName: string | null;
 		/** Verified returning guest name, when the signed cookie is present. */
 		guestName: string | null;
+		/** Top-level comment being replied to; absent for the main composer. */
+		parentId?: string;
+		/** Author name of the comment being replied to, for the placeholder. */
+		replyingTo?: string;
+		/** Called when a reply publishes, so the composer can close. */
+		onDone?: () => void;
 	}
 
-	let { postId, memberName, guestName }: Props = $props();
+	let { postId, memberName, guestName, parentId, replyingTo, onDone }: Props = $props();
+
+	// Reply composers get isolated form state so they don't share issues,
+	// results, or pending state with the main composer or each other.
+	const commentForm = $derived(parentId ? submitComment.for(parentId) : submitComment);
 
 	const identified = $derived(Boolean(memberName || guestName));
-	const pending = $derived(submitComment.result?.status === 'pending');
+	const pending = $derived(commentForm.result?.status === 'pending');
+
+	$effect(() => {
+		if (commentForm.result?.status === 'published') onDone?.();
+	});
 </script>
 
 {#if pending}
@@ -24,14 +38,17 @@
 		</p>
 	</div>
 {:else}
-	<form class="comment-form" {...submitComment}>
-		<input {...submitComment.fields.postId.as('hidden', postId)} />
+	<form class="comment-form" {...commentForm}>
+		<input {...commentForm.fields.postId.as('hidden', postId)} />
+		{#if parentId}
+			<input {...commentForm.fields.parentId.as('hidden', parentId)} />
+		{/if}
 
 		<!-- Honeypot: hidden from humans, tempting to bots. -->
 		<div class="hp" aria-hidden="true">
 			<label>
 				Website
-				<input {...submitComment.fields.website.as('text')} tabindex="-1" autocomplete="off" />
+				<input {...commentForm.fields.website.as('text')} tabindex="-1" autocomplete="off" />
 			</label>
 		</div>
 
@@ -42,22 +59,22 @@
 		{:else}
 			<div class="guest-fields">
 				<div class="guest-field">
-					{#each submitComment.fields.name.issues() ?? [] as issue (issue.message)}
+					{#each commentForm.fields.name.issues() ?? [] as issue (issue.message)}
 						<p class="issue">{issue.message}</p>
 					{/each}
 					<input
-						{...submitComment.fields.name.as('text')}
+						{...commentForm.fields.name.as('text')}
 						placeholder="Your name"
 						autocomplete="name"
 						maxlength="100"
 					/>
 				</div>
 				<div class="guest-field">
-					{#each submitComment.fields.email.issues() ?? [] as issue (issue.message)}
+					{#each commentForm.fields.email.issues() ?? [] as issue (issue.message)}
 						<p class="issue">{issue.message}</p>
 					{/each}
 					<input
-						{...submitComment.fields.email.as('text')}
+						{...commentForm.fields.email.as('text')}
 						placeholder="Email (never shown)"
 						autocomplete="email"
 						inputmode="email"
@@ -67,14 +84,14 @@
 			</div>
 		{/if}
 
-		{#each submitComment.fields.body.issues() ?? [] as issue (issue.message)}
+		{#each commentForm.fields.body.issues() ?? [] as issue (issue.message)}
 			<p class="issue">{issue.message}</p>
 		{/each}
 		<textarea
-			{...submitComment.fields.body.as('text')}
+			{...commentForm.fields.body.as('text')}
 			rows="4"
 			maxlength="5000"
-			placeholder="Join the conversation…"></textarea>
+			placeholder={replyingTo ? `Reply to ${replyingTo}…` : 'Join the conversation…'}></textarea>
 
 		<div class="form-footer">
 			{#if !identified}
@@ -82,9 +99,14 @@
 			{:else}
 				<span></span>
 			{/if}
-			<button type="submit" disabled={!!submitComment.pending}>
-				{submitComment.pending ? 'Sending…' : 'Post comment'}
-			</button>
+			<div class="form-buttons">
+				{#if onDone}
+					<button type="button" class="cancel-btn" onclick={onDone}>Cancel</button>
+				{/if}
+				<button type="submit" disabled={!!commentForm.pending}>
+					{commentForm.pending ? 'Sending…' : parentId ? 'Post reply' : 'Post comment'}
+				</button>
+			</div>
 		</div>
 	</form>
 {/if}
@@ -183,6 +205,30 @@
 	.hint {
 		font-size: 0.75rem;
 		color: var(--muted-foreground);
+	}
+
+	.form-buttons {
+		display: flex;
+		flex-shrink: 0;
+		align-items: center;
+		gap: 0.5rem;
+	}
+
+	.cancel-btn {
+		padding: 0.5rem 1rem;
+		font-size: 0.85rem;
+		color: var(--muted-foreground);
+		border: 1px solid var(--border);
+		border-radius: 999px;
+		transition:
+			border-color var(--duration-fast, 150ms) ease,
+			color var(--duration-fast, 150ms) ease;
+	}
+
+	.cancel-btn:hover,
+	.cancel-btn:focus-visible {
+		border-color: var(--secondary);
+		color: var(--secondary-800);
 	}
 
 	button[type='submit'] {

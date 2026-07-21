@@ -2,6 +2,7 @@ import { postExtensions } from '@/lib/editor/extensions';
 import type { CommentView, PostPreview } from '@/lib/types';
 import { generateHTML } from '@tiptap/html';
 import { and, asc, desc, eq, ne } from 'drizzle-orm';
+import type { ViewerIdentity } from './comment-identity';
 import { db } from './db';
 import { comment, post } from './db/schema';
 
@@ -119,22 +120,53 @@ export async function getPublishedPostBySlug(slug: string) {
 	};
 }
 
-/** Published comments for a post — never exposes email addresses. */
-export async function listPublishedComments(postId: string): Promise<CommentView[]> {
+/**
+ * Published comments for a post as a two-level tree (pinned first, then
+ * chronological) — never exposes email addresses.
+ */
+export async function listPublishedComments(
+	postId: string,
+	viewer: ViewerIdentity
+): Promise<CommentView[]> {
 	const rows = await db.query.comment.findMany({
 		where: and(eq(comment.postId, postId), eq(comment.status, 'published')),
 		orderBy: asc(comment.createdAt),
 		with: {
 			user: { columns: { name: true } },
-			commenter: { columns: { name: true } }
+			commenter: { columns: { name: true } },
+			likes: { columns: { userId: true, commenterId: true } }
 		}
 	});
 
-	return rows.map((row) => ({
+	const likedByViewer = (likes: { userId: string | null; commenterId: string | null }[]) => {
+		if (viewer.type === 'member') return likes.some((like) => like.userId === viewer.userId);
+		if (viewer.type === 'guest') {
+			return likes.some((like) => like.commenterId === viewer.commenterId);
+		}
+		return false;
+	};
+
+	const toView = (row: (typeof rows)[number]): CommentView => ({
 		id: row.id,
 		authorName: row.user?.name ?? row.commenter?.name ?? 'Anonymous',
 		isMember: !!row.user,
 		body: row.body,
-		createdAt: row.createdAt
-	}));
+		createdAt: row.createdAt,
+		pinned: row.pinnedAt !== null,
+		likeCount: row.likes.length,
+		likedByMe: likedByViewer(row.likes),
+		parentId: row.parentId,
+		replies: []
+	});
+
+	const topLevel = new Map(rows.filter((row) => !row.parentId).map((row) => [row.id, toView(row)]));
+
+	for (const row of rows) {
+		// Replies whose parent is missing/unpublished are silently dropped —
+		// rare, since deletes cascade to replies.
+		if (row.parentId) topLevel.get(row.parentId)?.replies.push(toView(row));
+	}
+
+	// Stable sort keeps chronological order within the pinned/unpinned groups.
+	return [...topLevel.values()].sort((a, b) => (a.pinned === b.pinned ? 0 : a.pinned ? -1 : 1));
 }

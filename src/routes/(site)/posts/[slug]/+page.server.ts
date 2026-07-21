@@ -8,7 +8,7 @@ export const load: PageServerLoad = async ({ params }) => {
 	if (!post) error(404, 'Post not found');
 
 	const viewer = await resolveViewerIdentity();
-	const comments = await listPublishedComments(post.id);
+	const comments = await listPublishedComments(post.id, viewer);
 
 	return {
 		headerTone: 'light' as const,

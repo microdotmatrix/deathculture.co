@@ -15,8 +15,14 @@
 
 	let { postId, comments, memberName, guestName, commentsEnabled, canComment }: Props = $props();
 
+	let replyingToId = $state<string | null>(null);
+
 	const expiredVerifyLink = $derived(page.url.searchParams.get('comment') === 'expired');
 	const disabledVerifyLink = $derived(page.url.searchParams.get('comment') === 'disabled');
+	const canWrite = $derived(commentsEnabled && !(memberName !== null && !canComment));
+	const totalCount = $derived(
+		comments.reduce((count, item) => count + 1 + item.replies.length, 0)
+	);
 
 	const dateFormat = new Intl.DateTimeFormat('en-GB', {
 		day: 'numeric',
@@ -25,13 +31,44 @@
 	});
 </script>
 
+{#snippet commentItem(item: CommentView, threadId: string)}
+	<div class="comment-avatar" aria-hidden="true">
+		{item.authorName.slice(0, 1).toUpperCase()}
+	</div>
+	<div class="comment-content">
+		<p class="comment-meta">
+			<span class="comment-author">{item.authorName}</span>
+			{#if item.isMember}
+				<span class="member-badge">Member</span>
+			{/if}
+			{#if item.pinned}
+				<span class="pinned-badge">Pinned</span>
+			{/if}
+			<time datetime={item.createdAt.toISOString()}>
+				{dateFormat.format(item.createdAt)}
+			</time>
+		</p>
+		<p class="comment-body">{item.body}</p>
+		{#if canWrite}
+			<div class="comment-actions">
+				<button
+					type="button"
+					class="reply-btn"
+					aria-expanded={replyingToId === threadId}
+					onclick={() => (replyingToId = replyingToId === threadId ? null : threadId)}
+				>
+					Reply
+				</button>
+			</div>
+		{/if}
+	</div>
+{/snippet}
+
 <section id="comments" class="comments" aria-labelledby="comments-heading">
 	<header class="comments-header">
 		<p class="kicker">Conversation</p>
 		<h2 id="comments-heading">
-			{comments.length === 0
-				? 'No comments yet'
-				: `${comments.length} comment${comments.length === 1 ? '' : 's'}`}
+			{totalCount === 0 ? 'No comments yet' : `${totalCount} comment${totalCount === 1 ? '' : 's'}`}
 		</h2>
 	</header>
 
@@ -51,22 +88,35 @@
 	{#if comments.length > 0}
 		<ol class="comment-list">
 			{#each comments as item (item.id)}
-				<li class="comment" id={`comment-${item.id}`}>
-					<div class="comment-avatar" aria-hidden="true">
-						{item.authorName.slice(0, 1).toUpperCase()}
-					</div>
-					<div class="comment-content">
-						<p class="comment-meta">
-							<span class="comment-author">{item.authorName}</span>
-							{#if item.isMember}
-								<span class="member-badge">Member</span>
-							{/if}
-							<time datetime={item.createdAt.toISOString()}>
-								{dateFormat.format(item.createdAt)}
-							</time>
-						</p>
-						<p class="comment-body">{item.body}</p>
-					</div>
+				<li class="comment-thread">
+					<article class="comment" id={`comment-${item.id}`}>
+						{@render commentItem(item, item.id)}
+					</article>
+
+					{#if item.replies.length > 0}
+						<ol class="replies" aria-label={`Replies to ${item.authorName}`}>
+							{#each item.replies as reply (reply.id)}
+								<li>
+									<article class="comment reply" id={`comment-${reply.id}`}>
+										{@render commentItem(reply, item.id)}
+									</article>
+								</li>
+							{/each}
+						</ol>
+					{/if}
+
+					{#if replyingToId === item.id}
+						<div class="reply-composer">
+							<CommentForm
+								{postId}
+								{memberName}
+								{guestName}
+								parentId={item.id}
+								replyingTo={item.authorName}
+								onDone={() => (replyingToId = null)}
+							/>
+						</div>
+					{/if}
 				</li>
 			{/each}
 		</ol>
@@ -133,6 +183,12 @@
 		border-radius: var(--radius-md);
 	}
 
+	.comment-thread {
+		display: flex;
+		flex-direction: column;
+		gap: 1.25rem;
+	}
+
 	.comment {
 		display: flex;
 		gap: 0.9rem;
@@ -142,6 +198,27 @@
 	.comment:target .comment-content {
 		background: var(--secondary-50);
 		outline: 1px solid var(--secondary-200);
+	}
+
+	.replies {
+		display: flex;
+		flex-direction: column;
+		gap: 1.25rem;
+		padding-left: clamp(1.6rem, 1rem + 3vw, 3.3rem);
+		border-left: 1px solid var(--border);
+		margin-left: 1.2rem;
+	}
+
+	.reply .comment-avatar {
+		width: 2rem;
+		height: 2rem;
+		font-size: 0.78rem;
+	}
+
+	.reply-composer {
+		padding-left: clamp(1.6rem, 1rem + 3vw, 3.3rem);
+		margin-left: 1.2rem;
+		border-left: 1px solid var(--secondary-300);
 	}
 
 	.comment-avatar {
@@ -187,6 +264,16 @@
 		border-radius: 999px;
 	}
 
+	.pinned-badge {
+		padding: 0.1rem 0.5rem;
+		font-size: 0.62rem;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		color: var(--secondary-900);
+		background: var(--secondary-100);
+		border-radius: 999px;
+	}
+
 	.comment-meta time {
 		font-size: 0.75rem;
 		color: var(--muted-foreground);
@@ -199,5 +286,24 @@
 		color: var(--foreground);
 		white-space: pre-line;
 		overflow-wrap: anywhere;
+	}
+
+	.comment-actions {
+		display: flex;
+		gap: 0.75rem;
+		margin-top: 0.5rem;
+	}
+
+	.reply-btn {
+		font-size: 0.75rem;
+		letter-spacing: 0.05em;
+		text-transform: uppercase;
+		color: var(--muted-foreground);
+		transition: color var(--duration-fast, 150ms) ease;
+	}
+
+	.reply-btn:hover,
+	.reply-btn:focus-visible {
+		color: var(--secondary-800);
 	}
 </style>

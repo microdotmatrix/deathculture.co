@@ -34,4 +34,10 @@ export interface CommentView {
 	isMember: boolean;
 	body: string;
 	createdAt: Date;
+	pinned: boolean;
+	likeCount: number;
+	likedByMe: boolean;
+	parentId: string | null;
+	/** Only populated on top-level comments; always [] on replies. */
+	replies: CommentView[];
 }

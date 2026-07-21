@@ -14,6 +14,8 @@ const VERIFY_TOKEN_TTL_MS = 1000 * 60 * 60 * 24; // 24 hours
 
 const commentSchema = z.object({
 	postId: z.string(),
+	/** Top-level comment being replied to; absent for top-level comments. */
+	parentId: z.string().optional(),
 	body: z
 		.string()
 		.min(2, 'Say a little more than that')
@@ -37,6 +39,7 @@ export const submitComment = form(commentSchema, async (data, issue) => {
 	if (!target.commentsEnabled) error(403, 'Comments are closed on this post');
 
 	const body = data.body.trim();
+	const parentId = await resolveParentId(data.parentId, target.id);
 	const viewer = await resolveViewerIdentity();
 
 	// Members comment instantly — unless commenting was switched off for them.
@@ -47,6 +50,7 @@ export const submitComment = form(commentSchema, async (data, issue) => {
 			id: randomUUID(),
 			postId: target.id,
 			userId: viewer.userId,
+			parentId,
 			body,
 			status: 'published'
 		});
@@ -60,6 +64,7 @@ export const submitComment = form(commentSchema, async (data, issue) => {
 			id: randomUUID(),
 			postId: target.id,
 			commenterId: viewer.commenterId,
+			parentId,
 			body,
 			status: 'published'
 		});
@@ -94,6 +99,7 @@ export const submitComment = form(commentSchema, async (data, issue) => {
 		id: randomUUID(),
 		postId: target.id,
 		commenterId: guest.id,
+		parentId,
 		body,
 		status: 'pending',
 		verifyToken: token,
@@ -109,3 +115,25 @@ export const submitComment = form(commentSchema, async (data, issue) => {
 
 	return { status: 'pending' as const };
 });
+
+/**
+ * Validates a reply target and flattens reply-to-reply onto the top-level
+ * comment, keeping threads a single level deep.
+ */
+async function resolveParentId(
+	requestedParentId: string | undefined,
+	postId: string
+): Promise<string | null> {
+	if (!requestedParentId) return null;
+
+	const parent = await db.query.comment.findFirst({
+		columns: { id: true, postId: true, parentId: true, status: true },
+		where: eq(comment.id, requestedParentId)
+	});
+
+	if (!parent || parent.postId !== postId || parent.status !== 'published') {
+		error(400, 'Comment not found');
+	}
+
+	return parent.parentId ?? parent.id;
+}
