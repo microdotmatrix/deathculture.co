@@ -1,6 +1,4 @@
 <script lang="ts">
-	import { signOut } from '@/lib/auth.remote';
-	import Logo from '@/lib/components/site/Logo.svelte';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
@@ -10,103 +8,56 @@
 	<title>Studio — DeathCulture.co</title>
 </svelte:head>
 
-<div class="studio min-h-svh">
-	<header class="mx-auto flex max-w-5xl items-center justify-between px-5 py-5 sm:px-8">
-		<a href="/" class="flex items-center gap-3" aria-label="Back to DeathCulture.co">
-			<Logo size={34} />
-			<span class="wordmark">Studio</span>
-		</a>
-		<form {...signOut}>
-			<button class="sign-out" disabled={!!signOut.pending} type="submit">Sign out</button>
-		</form>
-	</header>
+<p class="kicker">Welcome back</p>
+<h1>{data.user.name}</h1>
 
-	<main class="mx-auto max-w-5xl px-5 py-10 sm:px-8">
-		<p class="kicker">Welcome back</p>
-		<h1>{data.user.name}</h1>
+{#if data.posts}
+	<section class="posts" aria-label="Posts">
+		<header class="posts-header">
+			<h2>Posts</h2>
+			<a class="new-post" href="/dashboard/posts/new">New post</a>
+		</header>
 
-		{#if data.posts}
-			<section class="posts" aria-label="Posts">
-				<header class="posts-header">
-					<h2>Posts</h2>
-					<a class="new-post" href="/dashboard/posts/new">New post</a>
-				</header>
-
-				{#if data.posts.length === 0}
-					<div class="empty">
-						<p>Nothing here yet. Write the first post for DeathCulture.co.</p>
-					</div>
-				{:else}
-					<ul class="post-list">
-						{#each data.posts as item (item.id)}
-							<li>
-								<a class="post-row" href={`/dashboard/posts/${item.id}`}>
-									<div class="post-row-main">
-										<h3>{item.title}</h3>
-										<p class="post-row-meta">
-											{#if item.status === 'published'}
-												Published {item.publishedDate}
-											{:else}
-												Edited {item.updatedDate}
-											{/if}
-										</p>
-									</div>
-									<span class={['status-chip', item.status]}>
-										{item.status === 'published' ? 'Published' : 'Draft'}
-									</span>
-								</a>
-							</li>
-						{/each}
-					</ul>
-				{/if}
-			</section>
+		{#if data.posts.length === 0}
+			<div class="empty">
+				<p>Nothing here yet. Write the first post for DeathCulture.co.</p>
+			</div>
 		{:else}
-			<section class="member" aria-label="Membership">
-				<h2>You're a member</h2>
-				<p>
-					Thanks for being part of DeathCulture.co. You'll receive the newsletter at
-					<strong>{data.user.email}</strong>, and you can comment on any post while signed in.
-				</p>
-				<a class="browse-link" href="/posts">Browse the journal &rarr;</a>
-			</section>
+			<ul class="post-list">
+				{#each data.posts as item (item.id)}
+					<li>
+						<a class="post-row" href={`/dashboard/posts/${item.id}`}>
+							<div class="post-row-main">
+								<h3>{item.title}</h3>
+								<p class="post-row-meta">
+									{#if item.status === 'published'}
+										Published {item.publishedDate}
+									{:else}
+										Edited {item.updatedDate}
+									{/if}
+								</p>
+							</div>
+							<span class={['status-chip', item.status]}>
+								{item.status === 'published' ? 'Published' : 'Draft'}
+							</span>
+						</a>
+					</li>
+				{/each}
+			</ul>
 		{/if}
-	</main>
-</div>
+	</section>
+{:else}
+	<section class="member" aria-label="Membership">
+		<h2>You're a member</h2>
+		<p>
+			Thanks for being part of DeathCulture.co. You'll receive the newsletter at
+			<strong>{data.user.email}</strong>, and you can comment on any post while signed in.
+		</p>
+		<a class="browse-link" href="/posts">Browse the journal &rarr;</a>
+	</section>
+{/if}
 
 <style>
-	.studio {
-		background: var(--background);
-	}
-
-	.studio header {
-		border-bottom: 1px solid var(--border);
-	}
-
-	.wordmark {
-		font-family: var(--font-display);
-		font-size: 0.9rem;
-		letter-spacing: 0.12em;
-		text-transform: uppercase;
-		color: var(--foreground);
-	}
-
-	.sign-out {
-		padding: 0.45rem 1.1rem;
-		font-size: 0.85rem;
-		color: var(--foreground);
-		border: 1px solid var(--border);
-		border-radius: 999px;
-		transition:
-			border-color var(--duration-fast, 150ms) ease,
-			color var(--duration-fast, 150ms) ease;
-	}
-
-	.sign-out:hover:not(:disabled),
-	.sign-out:focus-visible {
-		border-color: var(--secondary);
-		color: var(--secondary-800);
-	}
-
 	.kicker {
 		font-family: var(--font-display);
 		font-size: 0.7rem;
