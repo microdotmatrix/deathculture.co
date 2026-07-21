@@ -10,6 +10,7 @@ export const user = pgTable('user', {
 	role: text('role', { enum: ['admin', 'member'] })
 		.default('member')
 		.notNull(),
+	canComment: boolean('can_comment').default(true).notNull(),
 	createdAt: timestamp('created_at').defaultNow().notNull(),
 	updatedAt: timestamp('updated_at')
 		.defaultNow()

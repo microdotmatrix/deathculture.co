@@ -15,7 +15,9 @@ export const auth = betterAuth({
 	user: {
 		additionalFields: {
 			// `input: false` — clients can never set their own role at sign-up.
-			role: { type: 'string', defaultValue: 'member', input: false }
+			role: { type: 'string', defaultValue: 'member', input: false },
+			// Admin-controlled kill switch: false blocks commenting on every post.
+			canComment: { type: 'boolean', defaultValue: true, input: false }
 		}
 	},
 	plugins: [
