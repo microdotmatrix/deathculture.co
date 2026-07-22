@@ -2,23 +2,22 @@
 	import { tick } from 'svelte';
 	import { MediaQuery } from 'svelte/reactivity';
 	import { goto, replaceState } from '$app/navigation';
-	import { deletePost, savePost } from '@/lib/blog.remote';
+	import { deletePost, getEditorPost, savePost } from '@/lib/blog.remote';
 	import FeatureImageUpload from '@/lib/components/editor/FeatureImageUpload.svelte';
 	import TagInput from '@/lib/components/editor/TagInput.svelte';
 	import Tiptap from '@/lib/components/editor/Tiptap.svelte';
 	import Logo from '@/lib/components/site/Logo.svelte';
 	import ToggleSwitch from '@/lib/components/ui/ToggleSwitch.svelte';
-	import type { EditorPost } from '@/lib/types';
 	import type { JSONContent } from '@tiptap/core';
 
-	let { post = null }: { post?: EditorPost | null } = $props();
+	let { postId: routePostId = null }: { postId?: string | null } = $props();
 
 	const EMPTY_DOC: JSONContent = { type: 'doc', content: [{ type: 'paragraph' }] };
 
 	// The editor owns its state after mount; the route remounts it per post
-	// (see the {#key} in the [id] page), so snapshotting the prop once is safe.
+	// (see the {#key} in the [id] page), so snapshotting the loaded post once is safe.
 	// svelte-ignore state_referenced_locally
-	const initial = post;
+	const initial = routePostId ? await getEditorPost(routePostId) : null;
 
 	let postId = $state(initial?.id ?? null);
 	let title = $state(initial?.title ?? '');

@@ -1,25 +1,24 @@
 <script lang="ts">
-	import { invalidateAll } from '$app/navigation';
 	import { page } from '$app/state';
 	import { togglePin } from '@/lib/comments-admin.remote';
+	import { getCommentThread } from '@/lib/comments.remote';
 	import CommentForm from '@/lib/components/comments/CommentForm.svelte';
 	import CommentLikeButton from '@/lib/components/comments/CommentLikeButton.svelte';
 	import type { CommentView } from '@/lib/types';
 
 	interface Props {
 		postId: string;
-		comments: CommentView[];
-		memberName: string | null;
-		guestName: string | null;
 		commentsEnabled: boolean;
-		/** False when an admin has switched off commenting for this member. */
-		canComment: boolean;
-		/** True for members and verified guests — the identities we can dedupe. */
-		canLike: boolean;
 	}
 
-	let { postId, comments, memberName, guestName, commentsEnabled, canComment, canLike }: Props =
-		$props();
+	let { postId, commentsEnabled }: Props = $props();
+
+	const thread = $derived(await getCommentThread(postId));
+	const comments = $derived(thread.comments);
+	const memberName = $derived(thread.memberName);
+	const guestName = $derived(thread.guestName);
+	const canComment = $derived(thread.canComment);
+	const canLike = $derived(thread.canLike);
 
 	/** The comment whose Reply button was clicked; replies attach to its thread. */
 	let replying = $state<{ threadId: string; commentId: string; author: string } | null>(null);
@@ -27,15 +26,24 @@
 
 	const isAdmin = $derived(page.data.user?.role === 'admin');
 
+	async function refreshThread() {
+		await getCommentThread(postId).refresh();
+	}
+
 	async function handleTogglePin(commentId: string) {
 		if (pinBusy) return;
 		pinBusy = true;
 		try {
 			await togglePin(commentId);
-			await invalidateAll();
+			await refreshThread();
 		} finally {
 			pinBusy = false;
 		}
+	}
+
+	async function handlePublished() {
+		replying = null;
+		await refreshThread();
 	}
 
 	const expiredVerifyLink = $derived(page.url.searchParams.get('comment') === 'expired');
@@ -74,6 +82,7 @@
 				likeCount={item.likeCount}
 				likedByMe={item.likedByMe}
 				{canLike}
+				onChanged={refreshThread}
 			/>
 			{#if canWrite}
 				<button
@@ -152,7 +161,7 @@
 								{guestName}
 								parentId={item.id}
 								replyingTo={replying.author}
-								onDone={() => (replying = null)}
+								onDone={handlePublished}
 							/>
 						</div>
 					{/if}
@@ -167,7 +176,7 @@
 		<p class="closed-notice" role="status">You're currently not able to comment.</p>
 	{:else}
 		<div class="comment-form-wrap">
-			<CommentForm {postId} {memberName} {guestName} />
+			<CommentForm {postId} {memberName} {guestName} onDone={handlePublished} />
 		</div>
 	{/if}
 </section>

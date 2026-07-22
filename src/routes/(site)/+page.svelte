@@ -1,10 +1,11 @@
 <script lang="ts">
+	import { listPublishedPosts } from '@/lib/blog.remote';
 	import ArticleRow from '@/lib/components/landing/ArticleRow.svelte';
 	import FeatureBand from '@/lib/components/landing/FeatureBand.svelte';
 	import Hero from '@/lib/components/landing/Hero.svelte';
-	import type { PageProps } from './$types';
 
-	let { data }: PageProps = $props();
+	const LANDING_POST_COUNT = 3;
+	const latestPosts = await listPublishedPosts({ limit: LANDING_POST_COUNT });
 
 	const features = [
 		{
@@ -70,7 +71,7 @@
 	{/each}
 </section>
 
-{#if data.latestPosts.length > 0}
+{#if latestPosts.length > 0}
 	<section class="journal" aria-labelledby="journal-heading">
 		<div class="mx-auto max-w-6xl px-5 sm:px-8">
 			<header class="journal-header">
@@ -79,7 +80,7 @@
 			</header>
 
 			<div class="article-list">
-				{#each data.latestPosts as post (post.slug)}
+				{#each latestPosts as post (post.slug)}
 					<ArticleRow {post} />
 				{/each}
 			</div>

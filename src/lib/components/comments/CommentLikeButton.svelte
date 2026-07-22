@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { invalidateAll } from '$app/navigation';
 	import { toggleCommentLike } from '@/lib/comments.remote';
 
 	const HINT_TIMEOUT_MS = 3000;
@@ -10,9 +9,11 @@
 		likedByMe: boolean;
 		/** False for anonymous visitors — clicking shows a hint instead. */
 		canLike: boolean;
+		/** Refresh the surrounding comment thread after a successful toggle. */
+		onChanged?: () => void | Promise<void>;
 	}
 
-	let { commentId, likeCount, likedByMe, canLike }: Props = $props();
+	let { commentId, likeCount, likedByMe, canLike, onChanged }: Props = $props();
 
 	let busy = $state(false);
 	let showHint = $state(false);
@@ -28,7 +29,7 @@
 		busy = true;
 		try {
 			await toggleCommentLike({ commentId });
-			await invalidateAll();
+			await onChanged?.();
 		} finally {
 			busy = false;
 		}

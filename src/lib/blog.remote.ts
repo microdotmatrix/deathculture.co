@@ -1,14 +1,94 @@
-import { command } from '$app/server';
+import { command, query } from '$app/server';
 import { requireAdmin } from '@/lib/server/admin';
-import { renderPostHtml, slugify, uniquePostSlug } from '@/lib/server/blog';
+import {
+	formatPostDate,
+	getPublishedPostBySlug,
+	listPublishedPosts as listPublishedPostsFromDb,
+	renderPostHtml,
+	slugify,
+	uniquePostSlug
+} from '@/lib/server/blog';
 import { db } from '@/lib/server/db';
 import { post, postTag, tag } from '@/lib/server/db/schema';
+import type { EditorPost } from '@/lib/types';
+import type { JSONContent } from '@tiptap/core';
 import { error } from '@sveltejs/kit';
-import { eq } from 'drizzle-orm';
+import { desc, eq } from 'drizzle-orm';
 import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
 
 const MAX_TAGS = 10;
+
+const listPublishedPostsSchema = z
+	.object({
+		limit: z.number().int().positive().optional()
+	})
+	.optional();
+
+/** Published post previews for the journal and landing page. */
+export const listPublishedPosts = query(listPublishedPostsSchema, async (opts) => {
+	return listPublishedPostsFromDb(opts?.limit);
+});
+
+/** Single published post by slug — throws 404 when missing. */
+export const getPublishedPost = query(z.string().min(1), async (slug) => {
+	const row = await getPublishedPostBySlug(slug);
+	if (!row) error(404, 'Post not found');
+	return row;
+});
+
+/** Admin dashboard post list (newest edits first). */
+export const listAdminPosts = query(async () => {
+	requireAdmin();
+
+	const rows = await db.query.post.findMany({
+		columns: {
+			id: true,
+			title: true,
+			slug: true,
+			status: true,
+			publishedAt: true,
+			updatedAt: true
+		},
+		orderBy: desc(post.updatedAt)
+	});
+
+	return rows.map((row) => ({
+		id: row.id,
+		title: row.title || 'Untitled',
+		slug: row.slug,
+		status: row.status,
+		publishedDate: row.publishedAt ? formatPostDate(row.publishedAt) : null,
+		updatedDate: formatPostDate(row.updatedAt)
+	}));
+});
+
+/** Full editor document for a post id. */
+export const getEditorPost = query(z.string().min(1), async (id) => {
+	requireAdmin();
+
+	const row = await db.query.post.findFirst({
+		where: eq(post.id, id),
+		with: { tags: { with: { tag: { columns: { name: true } } } } }
+	});
+
+	if (!row) error(404, 'Post not found');
+
+	const editorPost: EditorPost = {
+		id: row.id,
+		title: row.title,
+		content: (row.content as JSONContent | null) ?? null,
+		excerpt: row.excerpt,
+		slug: row.slug,
+		featureImage: row.featureImage ?? '',
+		featureImageAlt: row.featureImageAlt ?? '',
+		status: row.status,
+		tags: row.tags.map(({ tag: t }) => t.name),
+		commentsEnabled: row.commentsEnabled
+	};
+
+	return editorPost;
+});
 
 const savePostSchema = z.object({
 	id: z.string().optional(),

@@ -1,7 +1,10 @@
 <script lang="ts">
+	import { listAdminPosts } from '@/lib/blog.remote';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
+
+	const posts = $derived(data.user.role === 'admin' ? await listAdminPosts() : null);
 </script>
 
 <svelte:head>
@@ -11,20 +14,20 @@
 <p class="kicker">Welcome back</p>
 <h1>{data.user.name}</h1>
 
-{#if data.posts}
+{#if posts}
 	<section class="posts" aria-label="Posts">
 		<header class="posts-header">
 			<h2>Posts</h2>
 			<a class="new-post" href="/dashboard/posts/new">New post</a>
 		</header>
 
-		{#if data.posts.length === 0}
+		{#if posts.length === 0}
 			<div class="empty">
 				<p>Nothing here yet. Write the first post for DeathCulture.co.</p>
 			</div>
 		{:else}
 			<ul class="post-list">
-				{#each data.posts as item (item.id)}
+				{#each posts as item (item.id)}
 					<li>
 						<a class="post-row" href={`/dashboard/posts/${item.id}`}>
 							<div class="post-row-main">

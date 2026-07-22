@@ -1,4 +1,5 @@
-import { command, form } from '$app/server';
+import { command, form, query } from '$app/server';
+import { listPublishedComments } from '@/lib/server/blog';
 import { resolveViewerIdentity } from '@/lib/server/comment-identity';
 import { db } from '@/lib/server/db';
 import { comment, commentLike, commenter, post } from '@/lib/server/db/schema';
@@ -13,6 +14,26 @@ import { ORIGIN } from '$env/static/private';
 const VERIFY_TOKEN_TTL_MS = 1000 * 60 * 60 * 24; // 24 hours
 const PENDING_WINDOW_MS = 1000 * 60 * 60; // 1 hour
 const MAX_PENDING_PER_WINDOW = 3;
+
+/** Published comment tree + viewer identity flags for a post. */
+export const getCommentThread = query(z.string().min(1), async (postId) => {
+	const target = await db.query.post.findFirst({
+		columns: { id: true },
+		where: and(eq(post.id, postId), eq(post.status, 'published'))
+	});
+	if (!target) error(404, 'Post not found');
+
+	const viewer = await resolveViewerIdentity();
+	const comments = await listPublishedComments(postId, viewer);
+
+	return {
+		comments,
+		memberName: viewer.type === 'member' ? viewer.name : null,
+		guestName: viewer.type === 'guest' ? viewer.name : null,
+		canComment: viewer.type === 'member' ? viewer.canComment : true,
+		canLike: viewer.type !== 'anonymous'
+	};
+});
 
 const commentSchema = z.object({
 	postId: z.string(),

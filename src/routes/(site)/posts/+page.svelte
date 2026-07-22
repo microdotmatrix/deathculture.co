@@ -1,10 +1,9 @@
 <script lang="ts">
 	import { page } from '$app/state';
+	import { listPublishedPosts } from '@/lib/blog.remote';
 	import ArticleRow from '@/lib/components/landing/ArticleRow.svelte';
-	import type { PageProps } from './$types';
 
-	let { data }: PageProps = $props();
-
+	const posts = await listPublishedPosts();
 	const invalidVerifyLink = $derived(page.url.searchParams.get('comment') === 'invalid');
 </script>
 
@@ -36,11 +35,11 @@
 			</p>
 		{/if}
 
-		{#if data.posts.length === 0}
+		{#if posts.length === 0}
 			<p class="empty">Nothing published yet — check back soon.</p>
 		{:else}
 			<div class="article-list">
-				{#each data.posts as post (post.slug)}
+				{#each posts as post (post.slug)}
 					<ArticleRow {post} />
 				{/each}
 			</div>

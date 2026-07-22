@@ -1,11 +1,10 @@
 <script lang="ts">
+	import { page } from '$app/state';
+	import { getPublishedPost } from '@/lib/blog.remote';
 	import CommentSection from '@/lib/components/comments/CommentSection.svelte';
 	import Logo from '@/lib/components/site/Logo.svelte';
-	import type { PageProps } from './$types';
 
-	let { data }: PageProps = $props();
-
-	const post = $derived(data.post);
+	const post = $derived(await getPublishedPost(page.params.slug!));
 </script>
 
 <svelte:head>
@@ -77,15 +76,7 @@
 				{@html post.contentHtml}
 			</div>
 
-			<CommentSection
-				postId={post.id}
-				comments={data.comments}
-				memberName={data.memberName}
-				guestName={data.guestName}
-				commentsEnabled={post.commentsEnabled}
-				canComment={data.canComment}
-				canLike={data.canLike}
-			/>
+			<CommentSection postId={post.id} commentsEnabled={post.commentsEnabled} />
 		</div>
 	</div>
 </article>
