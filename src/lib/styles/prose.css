@@ -100,6 +100,66 @@
 	font-weight: 700;
 }
 
+.dc-prose img {
+	display: block;
+	max-width: 100%;
+	height: auto;
+	margin-inline: auto;
+	border-radius: var(--radius-md);
+}
+
+.dc-prose .tableWrapper {
+	overflow-x: auto;
+}
+
+.dc-prose table {
+	width: 100%;
+	border-collapse: collapse;
+	table-layout: fixed;
+}
+
+.dc-prose th,
+.dc-prose td {
+	position: relative;
+	min-width: 6rem;
+	padding: 0.55rem 0.7rem;
+	vertical-align: top;
+	border: 1px solid var(--border);
+}
+
+.dc-prose th {
+	font-weight: 700;
+	text-align: start;
+	background: var(--muted);
+}
+
+.dc-prose th > :first-child,
+.dc-prose td > :first-child {
+	margin-top: 0;
+}
+
+.dc-prose .selectedCell::after {
+	position: absolute;
+	inset: 0;
+	pointer-events: none;
+	content: '';
+	background: oklch(from var(--secondary-400) l c h / 0.22);
+}
+
+.dc-prose .column-resize-handle {
+	position: absolute;
+	top: 0;
+	right: -2px;
+	bottom: 0;
+	width: 4px;
+	pointer-events: none;
+	background: var(--secondary-500);
+}
+
+.dc-prose.resize-cursor {
+	cursor: col-resize;
+}
+
 .dc-prose > :first-child {
 	margin-top: 0;
 }

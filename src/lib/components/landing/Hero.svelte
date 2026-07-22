@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { subscribe } from '@/lib/newsletter.remote';
+	import Icon from '@iconify/svelte';
 </script>
 
 <section class="hero" aria-labelledby="hero-heading">
@@ -44,7 +45,11 @@
 							type="submit"
 							aria-label="Subscribe to our newsletter"
 						>
-							{subscribe.pending ? 'Subscribing…' : 'Subscribe'}
+							{#if subscribe.pending}
+								Subscribing... <Icon icon="svg-spinners:90-ring" />
+							{:else}
+								Subscribe <Icon icon="mdi:arrow-right" />
+							{/if}
 						</button>
 					</form>
 					{#each subscribe.fields.email.issues() ?? [] as issue (issue.message)}
@@ -162,6 +167,9 @@
 	}
 
 	.subscribe-form button {
+		display: flex;
+		align-items: center;
+		gap: 0.35rem;
 		flex-shrink: 0;
 		padding: 0.55rem 1.35rem;
 		font-size: 0.85rem;

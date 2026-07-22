@@ -11,6 +11,8 @@
 		"prepare": "svelte-kit sync || echo ''",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+		"test:editor": "node --test src/lib/components/editor/InlineImageDialog.position.test.ts src/lib/editor/slash-commands.test.ts src/lib/editor/slash-commands.integration.test.ts",
+		"test:editor:coverage": "node --test --experimental-test-coverage src/lib/components/editor/InlineImageDialog.position.test.ts src/lib/editor/slash-commands.test.ts src/lib/editor/slash-commands.integration.test.ts",
 		"lint": "prettier --check .",
 		"format": "prettier --write .",
 		"db:push": "drizzle-kit push",
@@ -29,10 +31,13 @@
 		"@tailwindcss/vite": "^4.3.0",
 		"@tiptap/core": "^3.28.0",
 		"@tiptap/extension-bubble-menu": "^3.28.0",
+		"@tiptap/extension-image": "^3.28.0",
+		"@tiptap/extension-table": "^3.28.0",
 		"@tiptap/extensions": "^3.28.0",
 		"@tiptap/html": "^3.28.0",
 		"@tiptap/pm": "^3.28.0",
 		"@tiptap/starter-kit": "^3.28.0",
+		"@tiptap/suggestion": "^3.28.0",
 		"@types/node": "^24",
 		"@uploadthing/svelte": "^7.3.3",
 		"auth": "^1.6.23",
@@ -48,8 +53,8 @@
 		"svelte-check": "^4.6.0",
 		"tailwindcss": "^4.3.0",
 		"typescript": "^6.0.3",
+		"uploadthing": "^7.7.4",
 		"vite": "^8.0.16",
-		"zod": "^4.4.3",
-		"uploadthing": "^7.7.4"
+		"zod": "^4.4.3"
 	}
 }

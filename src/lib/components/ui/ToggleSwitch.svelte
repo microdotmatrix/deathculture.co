@@ -15,8 +15,8 @@
 	<input
 		type="checkbox"
 		role="switch"
-		{checked}
-		{disabled}
+		aria-checked={checked}
+		aria-disabled={disabled}
 		onchange={(event) => onchange(event.currentTarget.checked)}
 	/>
 	<span class="track" aria-hidden="true"><span class="thumb"></span></span>
