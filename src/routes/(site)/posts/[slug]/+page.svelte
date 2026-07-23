@@ -1,10 +1,14 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { getPublishedPost } from '@/lib/blog.remote';
+	import { getPublishedPostBody } from '@/lib/blog.remote';
 	import CommentSection from '@/lib/components/comments/CommentSection.svelte';
+	import PostBodySkeleton from '@/lib/components/posts/PostBodySkeleton.svelte';
 	import Logo from '@/lib/components/site/Logo.svelte';
+	import type { PageProps } from './$types';
 
-	const post = $derived(await getPublishedPost(page.params.slug!));
+	let { data }: PageProps = $props();
+	const post = $derived(data.post);
+	const slug = $derived(page.params.slug!);
 </script>
 
 <svelte:head>
@@ -54,8 +58,12 @@
 					<p class="author-name">{post.author.name}</p>
 					<p class="post-date">
 						<time datetime={post.publishedAt.toISOString()}>{post.date}</time>
-						<span aria-hidden="true">&middot;</span>
-						{post.readingTime}
+						<svelte:boundary>
+							{#snippet pending()}{/snippet}
+							{@const body = await getPublishedPostBody(slug)}
+							<span aria-hidden="true">&middot;</span>
+							{body.readingTime}
+						</svelte:boundary>
 					</p>
 				</div>
 			</div>
@@ -70,11 +78,21 @@
 		</aside>
 
 		<div class="post-main">
-			<div class="dc-prose">
-				<!-- eslint-disable-next-line svelte/no-at-html-tags — HTML is generated
-				     server-side from schema-constrained TipTap JSON, admin-authored. -->
-				{@html post.contentHtml}
-			</div>
+			<svelte:boundary>
+				{#snippet pending()}
+					{#if post.excerpt}
+						<p class="seo-excerpt">{post.excerpt}</p>
+					{/if}
+					<PostBodySkeleton />
+				{/snippet}
+
+				{@const body = await getPublishedPostBody(slug)}
+				<div class="dc-prose">
+					<!-- eslint-disable-next-line svelte/no-at-html-tags — HTML is generated
+					     server-side from schema-constrained TipTap JSON, admin-authored. -->
+					{@html body.contentHtml}
+				</div>
+			</svelte:boundary>
 
 			<CommentSection postId={post.id} commentsEnabled={post.commentsEnabled} />
 		</div>
@@ -245,5 +263,12 @@
 
 	.tag-chip [aria-hidden] {
 		color: var(--secondary-600);
+	}
+
+	.seo-excerpt {
+		margin-bottom: 1.25rem;
+		font-size: clamp(0.95rem, 0.9rem + 0.3vw, 1.1rem);
+		line-height: 1.65;
+		color: var(--base-500);
 	}
 </style>
