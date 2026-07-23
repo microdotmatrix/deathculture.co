@@ -74,7 +74,7 @@
 						<p class="issue">{issue.message}</p>
 					{/each}
 					<input
-						{...commentForm.fields.email.as('text')}
+						{...commentForm.fields.email.as('email')}
 						placeholder="Email (never shown)"
 						autocomplete="email"
 						inputmode="email"

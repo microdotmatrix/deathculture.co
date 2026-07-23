@@ -1,14 +1,16 @@
 <script lang="ts">
-	import { page } from '$app/state';
 	import { getPublishedPostBody } from '@/lib/blog.remote';
 	import CommentSection from '@/lib/components/comments/CommentSection.svelte';
 	import PostBodySkeleton from '@/lib/components/posts/PostBodySkeleton.svelte';
 	import Logo from '@/lib/components/site/Logo.svelte';
 	import type { PageProps } from './$types';
 
-	let { data }: PageProps = $props();
+	let { data, params }: PageProps = $props();
 	const post = $derived(data.post);
-	const slug = $derived(page.params.slug!);
+	// Prefer route props over $app/state — during client nav, page.params can briefly
+	// be empty while this component is still tearing down, which would call the remote
+	// with undefined and surface as a 400 Bad Request.
+	const slug = $derived(params.slug);
 </script>
 
 <svelte:head>
@@ -58,12 +60,14 @@
 					<p class="author-name">{post.author.name}</p>
 					<p class="post-date">
 						<time datetime={post.publishedAt.toISOString()}>{post.date}</time>
-						<svelte:boundary>
-							{#snippet pending()}{/snippet}
-							{@const body = await getPublishedPostBody(slug)}
-							<span aria-hidden="true">&middot;</span>
-							{body.readingTime}
-						</svelte:boundary>
+						{#if slug}
+							<svelte:boundary>
+								{#snippet pending()}{/snippet}
+								{@const body = await getPublishedPostBody(slug)}
+								<span aria-hidden="true">&middot;</span>
+								{body.readingTime}
+							</svelte:boundary>
+						{/if}
 					</p>
 				</div>
 			</div>
@@ -80,24 +84,32 @@
 		<div class="post-main">
 			<svelte:boundary>
 				{#snippet pending()}
-					{#if post.excerpt}
-						<p class="seo-excerpt">{post.excerpt}</p>
-					{/if}
-					<PostBodySkeleton />
+					{@render bodyFallback()}
 				{/snippet}
 
-				{@const body = await getPublishedPostBody(slug)}
-				<div class="dc-prose">
-					<!-- eslint-disable-next-line svelte/no-at-html-tags — HTML is generated
-					     server-side from schema-constrained TipTap JSON, admin-authored. -->
-					{@html body.contentHtml}
-				</div>
+				{#if slug}
+					{@const body = await getPublishedPostBody(slug)}
+					<div class="dc-prose">
+						<!-- eslint-disable-next-line svelte/no-at-html-tags — HTML is generated
+						     server-side from schema-constrained TipTap JSON, admin-authored. -->
+						{@html body.contentHtml}
+					</div>
+				{:else}
+					{@render bodyFallback()}
+				{/if}
 			</svelte:boundary>
 
 			<CommentSection postId={post.id} commentsEnabled={post.commentsEnabled} />
 		</div>
 	</div>
 </article>
+
+{#snippet bodyFallback()}
+	{#if post.excerpt}
+		<p class="seo-excerpt">{post.excerpt}</p>
+	{/if}
+	<PostBodySkeleton />
+{/snippet}
 
 <style>
 	.post {

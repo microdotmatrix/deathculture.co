@@ -301,4 +301,7 @@
 		font-family: var(--font-display);
 		font-weight: 400;
 	}
+	:where(button) {
+		cursor: pointer;
+	}
 }

@@ -16,8 +16,13 @@
 
 	// The editor owns its state after mount; the route remounts it per post
 	// (see the {#key} in the [id] page), so snapshotting the loaded post once is safe.
+	// Guard against empty/undefined ids — client nav can briefly clear params, and calling
+	// getEditorPost(undefined) fails remote schema validation as a 400 Bad Request.
 	// svelte-ignore state_referenced_locally
-	const initial = routePostId ? await getEditorPost(routePostId) : null;
+	const initial =
+		typeof routePostId === 'string' && routePostId.length > 0
+			? await getEditorPost(routePostId)
+			: null;
 
 	let postId = $state(initial?.id ?? null);
 	let title = $state(initial?.title ?? '');
