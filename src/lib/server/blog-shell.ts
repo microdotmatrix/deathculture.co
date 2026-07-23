@@ -11,6 +11,7 @@ export type PublishedPostShellRow = {
 	publishedAt: Date | null;
 	createdAt: Date;
 	commentsEnabled: boolean;
+	contentHtml?: string;
 	author: { name: string; image: string | null };
 	tags: { tag: { name: string; slug: string } }[];
 };
