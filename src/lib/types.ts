@@ -28,6 +28,25 @@ export interface EditorPost {
 	commentsEnabled: boolean;
 }
 
+export interface PublishedPostShell {
+	id: string;
+	slug: string;
+	title: string;
+	excerpt: string;
+	featureImage: string;
+	featureImageAlt: string;
+	publishedAt: Date;
+	commentsEnabled: boolean;
+	date: string;
+	author: { name: string; image: string | null };
+	tags: { name: string; slug: string }[];
+}
+
+export interface PublishedPostBody {
+	contentHtml: string;
+	readingTime: string;
+}
+
 export interface CommentView {
 	id: string;
 	authorName: string;

@@ -1,12 +1,17 @@
 import { postExtensions } from '@/lib/editor/extensions';
-import type { CommentView, PostPreview } from '@/lib/types';
+import type { CommentView, PostPreview, PublishedPostShell } from '@/lib/types';
 import { generateHTML } from '@tiptap/html';
 import { and, asc, desc, eq, ne } from 'drizzle-orm';
 import type { ViewerIdentity } from './comment-identity';
 import { db } from './db';
 import { comment, post } from './db/schema';
 
-const WORDS_PER_MINUTE = 220;
+import { formatPostDate, readingTime } from './blog-format';
+import { toPublishedPostShell } from './blog-shell';
+
+export { formatPostDate, readingTime } from './blog-format';
+export { toPublishedPostShell } from './blog-shell';
+
 const FEATURE_IMAGE_WIDTH = 1600;
 const FEATURE_IMAGE_HEIGHT = 900;
 
@@ -43,22 +48,6 @@ export async function uniquePostSlug(base: string, excludeId?: string): Promise<
 	}
 }
 
-export function readingTime(html: string): string {
-	const words = html
-		.replace(/<[^>]*>/g, ' ')
-		.split(/\s+/)
-		.filter(Boolean).length;
-	return `${Math.max(1, Math.ceil(words / WORDS_PER_MINUTE))} min read`;
-}
-
-export function formatPostDate(date: Date): string {
-	return new Intl.DateTimeFormat('en-GB', {
-		day: 'numeric',
-		month: 'short',
-		year: 'numeric'
-	}).format(date);
-}
-
 type PostWithTags = typeof post.$inferSelect & {
 	tags: { tag: { name: string; slug: string } }[];
 };
@@ -92,8 +81,19 @@ export async function listPublishedPosts(limit?: number): Promise<PostPreview[]>
 	return rows.map(toPreview);
 }
 
-export async function getPublishedPostBySlug(slug: string) {
+export async function getPublishedPostShell(slug: string): Promise<PublishedPostShell | null> {
 	const row = await db.query.post.findFirst({
+		columns: {
+			id: true,
+			slug: true,
+			title: true,
+			excerpt: true,
+			featureImage: true,
+			featureImageAlt: true,
+			publishedAt: true,
+			createdAt: true,
+			commentsEnabled: true
+		},
 		where: and(eq(post.slug, slug), eq(post.status, 'published')),
 		with: {
 			author: { columns: { name: true, image: true } },
@@ -102,22 +102,27 @@ export async function getPublishedPostBySlug(slug: string) {
 	});
 
 	if (!row) return null;
+	return toPublishedPostShell(row);
+}
 
-	return {
-		id: row.id,
-		slug: row.slug,
-		title: row.title,
-		excerpt: row.excerpt,
-		contentHtml: row.contentHtml,
-		featureImage: row.featureImage,
-		featureImageAlt: row.featureImageAlt ?? row.title,
-		publishedAt: row.publishedAt ?? row.createdAt,
-		commentsEnabled: row.commentsEnabled,
-		date: formatPostDate(row.publishedAt ?? row.createdAt),
-		readingTime: readingTime(row.contentHtml),
-		author: { name: row.author.name, image: row.author.image },
-		tags: row.tags.map(({ tag }) => ({ name: tag.name, slug: tag.slug }))
-	};
+export async function getPublishedPostBodyBySlug(
+	slug: string
+): Promise<{ contentHtml: string; readingTime: string } | null> {
+	const row = await db.query.post.findFirst({
+		columns: { contentHtml: true },
+		where: and(eq(post.slug, slug), eq(post.status, 'published'))
+	});
+
+	if (!row) return null;
+	return { contentHtml: row.contentHtml, readingTime: readingTime(row.contentHtml) };
+}
+
+export async function getPublishedPostBySlug(slug: string) {
+	const shell = await getPublishedPostShell(slug);
+	if (!shell) return null;
+	const body = await getPublishedPostBodyBySlug(slug);
+	if (!body) return null;
+	return { ...shell, ...body };
 }
 
 /**
