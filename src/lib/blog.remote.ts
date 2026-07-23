@@ -2,7 +2,7 @@ import { command, query } from '$app/server';
 import { requireAdmin } from '@/lib/server/admin';
 import {
 	formatPostDate,
-	getPublishedPostBySlug,
+	getPublishedPostBodyBySlug,
 	listPublishedPosts as listPublishedPostsFromDb,
 	renderPostHtml,
 	slugify,
@@ -30,9 +30,9 @@ export const listPublishedPosts = query(listPublishedPostsSchema, async (opts) =
 	return listPublishedPostsFromDb(opts?.limit);
 });
 
-/** Single published post by slug — throws 404 when missing. */
-export const getPublishedPost = query(z.string().min(1), async (slug) => {
-	const row = await getPublishedPostBySlug(slug);
+/** Rendered HTML + reading time for a published slug (no metadata shell). */
+export const getPublishedPostBody = query(z.string().min(1), async (slug) => {
+	const row = await getPublishedPostBodyBySlug(slug);
 	if (!row) error(404, 'Post not found');
 	return row;
 });
