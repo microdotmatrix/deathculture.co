@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { invalidateAll } from '$app/navigation';
 	import { deleteComment, togglePin, updateCommentBody } from '@/lib/comments-admin.remote';
+	import { Badge, Button, Textarea } from '@/lib/components/ui';
 
 	interface ModerationComment {
 		id: string;
@@ -73,11 +74,11 @@
 	<header class="mod-meta">
 		<span class="author">{row.authorName}</span>
 		{#if row.isMember}
-			<span class="badge member">Member</span>
+			<Badge tone="primary">Member</Badge>
 		{/if}
-		<span class={['badge', row.status]}>{row.status}</span>
+		<Badge tone={row.status === 'published' ? 'primary' : 'secondary'}>{row.status}</Badge>
 		{#if row.pinned}
-			<span class="badge pinned">Pinned</span>
+			<Badge tone="secondary">Pinned</Badge>
 		{/if}
 		<time datetime={row.createdAt.toISOString()}>{dateFormat.format(row.createdAt)}</time>
 		<a class="post-link" href={`/posts/${row.postSlug}`} target="_blank" rel="noopener">
@@ -90,7 +91,9 @@
 	{/if}
 
 	{#if editing}
-		<textarea class="edit-area" rows="4" maxlength="5000" bind:value={draft}></textarea>
+		<div class="edit-area">
+			<Textarea rows={4} maxlength={5000} bind:value={draft} />
+		</div>
 	{:else}
 		<p class="body">{row.body}</p>
 	{/if}
@@ -101,25 +104,18 @@
 
 	<div class="actions">
 		{#if editing}
-			<button type="button" class="action primary" disabled={busy} onclick={saveEdit}>
+			<Button variant="secondary" size="sm" disabled={busy} onclick={saveEdit}>
 				{busy ? 'Saving…' : 'Save'}
-			</button>
-			<button type="button" class="action" disabled={busy} onclick={() => (editing = false)}>
-				Cancel
-			</button>
+			</Button>
+			<Button size="sm" disabled={busy} onclick={() => (editing = false)}>Cancel</Button>
 		{:else}
-			<button type="button" class="action" disabled={busy} onclick={startEditing}>Edit</button>
+			<Button size="sm" disabled={busy} onclick={startEditing}>Edit</Button>
 			{#if !row.isReply}
-				<button
-					type="button"
-					class="action"
-					disabled={busy}
-					onclick={() => run(() => togglePin(row.id))}
-				>
+				<Button size="sm" disabled={busy} onclick={() => run(() => togglePin(row.id))}>
 					{row.pinned ? 'Unpin' : 'Pin'}
-				</button>
+				</Button>
 			{/if}
-			<button type="button" class="action danger" disabled={busy} onclick={remove}>Delete</button>
+			<Button variant="danger" size="sm" disabled={busy} onclick={remove}>Delete</Button>
 		{/if}
 	</div>
 </article>
@@ -140,34 +136,6 @@
 		font-size: 0.9rem;
 		font-weight: 700;
 		color: var(--foreground);
-	}
-
-	.badge {
-		padding: 0.1rem 0.5rem;
-		font-size: 0.62rem;
-		letter-spacing: 0.08em;
-		text-transform: uppercase;
-		border-radius: 999px;
-	}
-
-	.badge.member {
-		color: var(--primary-900);
-		background: var(--primary-100);
-	}
-
-	.badge.published {
-		color: var(--primary-900);
-		background: var(--primary-100);
-	}
-
-	.badge.pending {
-		color: var(--secondary-900);
-		background: var(--secondary-100);
-	}
-
-	.badge.pinned {
-		color: var(--secondary-900);
-		background: var(--secondary-100);
 	}
 
 	.mod-meta time {
@@ -200,19 +168,7 @@
 	}
 
 	.edit-area {
-		width: 100%;
 		margin-top: 0.5rem;
-		padding: 0.6rem 0.85rem;
-		font-size: 0.9rem;
-		color: var(--foreground);
-		background: var(--background);
-		border: 1px solid var(--input);
-		border-radius: var(--radius-md);
-		resize: vertical;
-	}
-
-	.edit-area:focus {
-		outline: 1px solid var(--ring);
 	}
 
 	.error {
@@ -225,51 +181,5 @@
 		display: flex;
 		gap: 0.5rem;
 		margin-top: 0.75rem;
-	}
-
-	.action {
-		padding: 0.3rem 0.85rem;
-		font-size: 0.78rem;
-		color: var(--foreground);
-		border: 1px solid var(--border);
-		border-radius: 999px;
-		transition:
-			border-color var(--duration-fast, 150ms) ease,
-			color var(--duration-fast, 150ms) ease,
-			background-color var(--duration-fast, 150ms) ease;
-	}
-
-	.action:hover:not(:disabled),
-	.action:focus-visible {
-		border-color: var(--secondary);
-		color: var(--secondary-800);
-	}
-
-	.action.primary {
-		color: var(--secondary-foreground);
-		background: var(--secondary);
-		border-color: var(--secondary);
-	}
-
-	.action.primary:hover:not(:disabled),
-	.action.primary:focus-visible {
-		background: var(--secondary-600);
-		color: var(--secondary-foreground);
-	}
-
-	.action.danger {
-		color: var(--destructive);
-		border-color: oklch(from var(--destructive) l c h / 0.4);
-	}
-
-	.action.danger:hover:not(:disabled),
-	.action.danger:focus-visible {
-		background: oklch(from var(--destructive) l c h / 0.08);
-		color: var(--destructive);
-		border-color: oklch(from var(--destructive) l c h / 0.4);
-	}
-
-	.action:disabled {
-		opacity: 0.6;
 	}
 </style>

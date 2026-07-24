@@ -2,6 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import CommentModerationRow from '@/lib/components/dashboard/CommentModerationRow.svelte';
+	import { EmptyState, Field, Select } from '@/lib/components/ui';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
@@ -28,21 +29,19 @@
 <h1>Comments</h1>
 
 <div class="filters">
-	<label>
-		<span class="filter-label">Status</span>
-		<select
+	<Field label="Status" orientation="inline">
+		<Select
 			value={data.filters.status}
 			onchange={(event) => applyFilter('status', event.currentTarget.value)}
 		>
 			<option value="all">All</option>
 			<option value="published">Published</option>
 			<option value="pending">Pending</option>
-		</select>
-	</label>
+		</Select>
+	</Field>
 
-	<label>
-		<span class="filter-label">Post</span>
-		<select
+	<Field label="Post" orientation="inline">
+		<Select
 			value={data.filters.postId}
 			onchange={(event) => applyFilter('post', event.currentTarget.value)}
 		>
@@ -50,13 +49,13 @@
 			{#each data.posts as item (item.id)}
 				<option value={item.id}>{item.title}</option>
 			{/each}
-		</select>
-	</label>
+		</Select>
+	</Field>
 </div>
 
 {#if data.comments.length === 0}
-	<div class="empty">
-		<p>No comments match these filters.</p>
+	<div class="empty-wrap">
+		<EmptyState>No comments match these filters.</EmptyState>
 	</div>
 {:else}
 	<ul class="mod-list">
@@ -88,45 +87,8 @@
 		margin-top: 2rem;
 	}
 
-	.filters label {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-	}
-
-	.filter-label {
-		font-family: var(--font-display);
-		font-size: 0.68rem;
-		letter-spacing: 0.22em;
-		text-transform: uppercase;
-		color: var(--secondary-700);
-	}
-
-	.filters select {
-		padding: 0.4rem 0.75rem;
-		font-size: 0.85rem;
-		color: var(--foreground);
-		background: var(--background);
-		border: 1px solid var(--input);
-		border-radius: var(--radius-md);
-	}
-
-	.filters select:focus {
-		outline: 1px solid var(--ring);
-	}
-
-	.empty {
+	.empty-wrap {
 		margin-top: 1.5rem;
-		padding: 2.5rem 2rem;
-		text-align: center;
-		border: 1px dashed var(--border);
-		border-radius: var(--radius-lg);
-		background: var(--muted);
-	}
-
-	.empty p {
-		font-size: 0.9rem;
-		color: var(--muted-foreground);
 	}
 
 	.mod-list {

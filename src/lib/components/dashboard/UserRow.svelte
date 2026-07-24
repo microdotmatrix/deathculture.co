@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { invalidateAll } from '$app/navigation';
-	import ToggleSwitch from '@/lib/components/ui/ToggleSwitch.svelte';
+	import { Button, Input, Select, ToggleSwitch } from '@/lib/components/ui';
 	import { removeUser, updateUser } from '@/lib/users.remote';
 
 	interface UserRowData {
@@ -73,10 +73,19 @@
 					saveName();
 				}}
 			>
-				<!-- svelte-ignore a11y_autofocus — focus moves into the field the user just asked to edit -->
-				<input type="text" maxlength="200" bind:value={nameDraft} disabled={busy} autofocus />
-				<button type="submit" class="action" disabled={busy}>Save</button>
-				<button type="button" class="action" onclick={() => (editingName = false)}>Cancel</button>
+				<!-- autofocus is intentional: focus moves into the field the user just asked to edit -->
+				<span class="name-input">
+					<Input
+						type="text"
+						dense
+						maxlength={200}
+						bind:value={nameDraft}
+						disabled={busy}
+						autofocus
+					/>
+				</span>
+				<Button type="submit" size="sm" disabled={busy}>Save</Button>
+				<Button size="sm" onclick={() => (editingName = false)}>Cancel</Button>
 			</form>
 		{:else}
 			<button type="button" class="name-btn" title="Edit name" onclick={startEditingName}>
@@ -89,8 +98,7 @@
 		{/if}
 	</td>
 	<td>
-		<select
-			class="role-select"
+		<Select
 			value={row.role}
 			disabled={isSelf || busy}
 			onchange={(event) =>
@@ -100,7 +108,7 @@
 		>
 			<option value="member">Member</option>
 			<option value="admin">Admin</option>
-		</select>
+		</Select>
 	</td>
 	<td>
 		<ToggleSwitch
@@ -123,9 +131,7 @@
 	<td class="count">{row.commentCount}</td>
 	<td class="joined">{row.joined}</td>
 	<td>
-		<button type="button" class="action danger" disabled={isSelf || busy} onclick={remove}>
-			Remove
-		</button>
+		<Button variant="danger" size="sm" disabled={isSelf || busy} onclick={remove}>Remove</Button>
 	</td>
 </tr>
 
@@ -157,17 +163,10 @@
 		align-items: center;
 	}
 
-	.name-edit input {
-		padding: 0.35rem 0.6rem;
-		font-size: 0.88rem;
-		color: var(--foreground);
-		background: var(--background);
-		border: 1px solid var(--input);
-		border-radius: var(--radius-md);
-	}
-
-	.name-edit input:focus {
-		outline: 1px solid var(--ring);
+	.name-input {
+		display: flex;
+		flex: 1;
+		min-width: 8rem;
 	}
 
 	.email {
@@ -182,23 +181,6 @@
 		color: var(--destructive);
 	}
 
-	.role-select {
-		padding: 0.35rem 0.6rem;
-		font-size: 0.82rem;
-		color: var(--foreground);
-		background: var(--background);
-		border: 1px solid var(--input);
-		border-radius: var(--radius-md);
-	}
-
-	.role-select:focus {
-		outline: 1px solid var(--ring);
-	}
-
-	.role-select:disabled {
-		opacity: 0.6;
-	}
-
 	.count {
 		font-variant-numeric: tabular-nums;
 		font-size: 0.88rem;
@@ -209,39 +191,5 @@
 		font-size: 0.8rem;
 		color: var(--muted-foreground);
 		white-space: nowrap;
-	}
-
-	.action {
-		padding: 0.3rem 0.85rem;
-		font-size: 0.78rem;
-		color: var(--foreground);
-		border: 1px solid var(--border);
-		border-radius: 999px;
-		transition:
-			border-color var(--duration-fast, 150ms) ease,
-			color var(--duration-fast, 150ms) ease,
-			background-color var(--duration-fast, 150ms) ease;
-	}
-
-	.action:hover:not(:disabled),
-	.action:focus-visible {
-		border-color: var(--secondary);
-		color: var(--secondary-800);
-	}
-
-	.action.danger {
-		color: var(--destructive);
-		border-color: oklch(from var(--destructive) l c h / 0.4);
-	}
-
-	.action.danger:hover:not(:disabled),
-	.action.danger:focus-visible {
-		background: oklch(from var(--destructive) l c h / 0.08);
-		color: var(--destructive);
-		border-color: oklch(from var(--destructive) l c h / 0.4);
-	}
-
-	.action:disabled {
-		opacity: 0.5;
 	}
 </style>
