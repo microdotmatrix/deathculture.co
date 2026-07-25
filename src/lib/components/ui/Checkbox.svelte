@@ -33,6 +33,7 @@
 	/>
 	<span class="box" aria-hidden="true">
 		<svg viewBox="0 0 12 12">
+			<title>Checkbox</title>
 			<path d="M2.5 6.5 5 9l4.5-6" />
 		</svg>
 	</span>

@@ -27,6 +27,7 @@
 	}: Props = $props();
 </script>
 
+<!-- biome-ignore lint/a11y/noLabelWithoutControl: input elements are rendered as children -->
 <label class={['field', orientation]}>
 	<span class={['field-label', hideLabel && 'sr-only']}>{label}</span>
 	{@render children()}

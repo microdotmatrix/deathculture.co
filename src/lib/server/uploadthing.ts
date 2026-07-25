@@ -1,4 +1,4 @@
-import { createUploadthing, UploadThingError, type FileRouter } from 'uploadthing/server';
+import { createUploadthing, type FileRouter, UploadThingError } from 'uploadthing/server';
 import { auth } from './auth';
 
 const f = createUploadthing();
@@ -9,7 +9,7 @@ export const fileRouter = {
 		.middleware(async ({ req }) => {
 			const session = await auth.api.getSession({ headers: req.headers });
 
-			if (!session || session.user.role !== 'admin') {
+			if (session?.user.role !== 'admin') {
 				throw new UploadThingError('Admin access required');
 			}
 
