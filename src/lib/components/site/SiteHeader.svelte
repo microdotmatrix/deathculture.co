@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { signOut } from '@/lib/auth.remote';
+	import { signOut } from '@/lib/data/auth.remote';
 	import type { User } from 'better-auth';
 	import Logo from './Logo.svelte';
 

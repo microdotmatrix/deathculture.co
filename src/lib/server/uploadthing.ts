@@ -17,7 +17,22 @@ export const fileRouter = {
 		})
 		.onUploadComplete(({ file }) => {
 			return { url: file.ufsUrl };
+		}),
+
+	/** Team-page portraits — admin only, matching who can edit the roster. */
+	teamPortrait: f({ image: { maxFileSize: '4MB', maxFileCount: 1 } })
+		.middleware(async ({ req }) => {
+			const session = await auth.api.getSession({ headers: req.headers });
+
+			if (session?.user.role !== 'admin') {
+				throw new UploadThingError('Admin access required');
+			}
+
+			return { userId: session.user.id };
+		})
+		.onUploadComplete(({ file }) => {
+			return { url: file.ufsUrl };
 		})
 } satisfies FileRouter;
 
-export type PostFileRouter = typeof fileRouter;
+export type AppFileRouter = typeof fileRouter;

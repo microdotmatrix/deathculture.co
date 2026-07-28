@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { listPublishedPosts } from '@/lib/blog.remote';
+	import { listPublishedPosts } from '@/lib/data/blog.remote';
 	import ArticleRow from '@/lib/components/landing/ArticleRow.svelte';
 	import FeatureBand from '@/lib/components/landing/FeatureBand.svelte';
 	import Hero from '@/lib/components/landing/Hero.svelte';

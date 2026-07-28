@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { toggleCommentLike } from '@/lib/comments.remote';
+	import { toggleCommentLike } from '@/lib/data/comments.remote';
 
 	const HINT_TIMEOUT_MS = 3000;
 

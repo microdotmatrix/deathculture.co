@@ -19,28 +19,30 @@
 
 ## File structure
 
-| File | Responsibility |
-|------|----------------|
-| `src/lib/types.ts` | `PublishedPostShell` type |
-| `src/lib/server/blog.ts` | `getPublishedPostShell`, slim body helper used by remote; keep or thin `getPublishedPostBySlug` |
-| `src/lib/server/blog-shell.test.ts` | Unit tests for shell mapping / no-`contentHtml` guarantee |
-| `src/lib/blog.remote.ts` | `getPublishedPostBody`; remove unused `getPublishedPost` if nothing else imports it |
-| `src/lib/components/posts/PostBodySkeleton.svelte` | Article pending UI |
-| `src/lib/components/comments/CommentThreadSkeleton.svelte` | Comments pending UI |
-| `src/routes/(site)/posts/[slug]/+page.server.ts` | Load shell + `headerTone`; 404 |
-| `src/routes/(site)/posts/[slug]/+page.svelte` | Shell UI + article boundary + CommentSection |
-| `src/lib/components/comments/CommentSection.svelte` | Conversation kicker outside pending; thread behind boundary |
+| File                                                       | Responsibility                                                                                  |
+| ---------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `src/lib/types.ts`                                         | `PublishedPostShell` type                                                                       |
+| `src/lib/server/blog.ts`                                   | `getPublishedPostShell`, slim body helper used by remote; keep or thin `getPublishedPostBySlug` |
+| `src/lib/server/blog-shell.test.ts`                        | Unit tests for shell mapping / no-`contentHtml` guarantee                                       |
+| `src/lib/blog.remote.ts`                                   | `getPublishedPostBody`; remove unused `getPublishedPost` if nothing else imports it             |
+| `src/lib/components/posts/PostBodySkeleton.svelte`         | Article pending UI                                                                              |
+| `src/lib/components/comments/CommentThreadSkeleton.svelte` | Comments pending UI                                                                             |
+| `src/routes/(site)/posts/[slug]/+page.server.ts`           | Load shell + `headerTone`; 404                                                                  |
+| `src/routes/(site)/posts/[slug]/+page.svelte`              | Shell UI + article boundary + CommentSection                                                    |
+| `src/lib/components/comments/CommentSection.svelte`        | Conversation kicker outside pending; thread behind boundary                                     |
 
 ---
 
 ### Task 1: `PublishedPostShell` type + `getPublishedPostShell` + tests
 
 **Files:**
+
 - Modify: `src/lib/types.ts`
 - Modify: `src/lib/server/blog.ts`
 - Create: `src/lib/server/blog-shell.test.ts`
 
 **Interfaces:**
+
 - Produces:
   - `PublishedPostShell` with: `id`, `slug`, `title`, `excerpt`, `featureImage`, `featureImageAlt`, `publishedAt`, `commentsEnabled`, `date`, `author: { name, image }`, `tags: { name, slug }[]`
   - `getPublishedPostShell(slug: string): Promise<PublishedPostShell | null>`
@@ -158,10 +160,12 @@ EOF
 ### Task 2: `getPublishedPostBody` remote; retire slug use of `getPublishedPost`
 
 **Files:**
+
 - Modify: `src/lib/blog.remote.ts`
 - Verify: `rg getPublishedPost src` — only remotes/docs should remain after Task 3
 
 **Interfaces:**
+
 - Consumes: `getPublishedPostBodyBySlug` from `@/lib/server/blog`
 - Produces: `getPublishedPostBody = query(z.string().min(1), async (slug) => PublishedPostBody)` with `error(404)` when null
 - Removes or keeps: `getPublishedPost` — **delete** once no runtime imports remain (after Task 3); in this task add the body query and leave `getPublishedPost` until the page migrates
@@ -203,10 +207,12 @@ EOF
 ### Task 3: Skeleton components
 
 **Files:**
+
 - Create: `src/lib/components/posts/PostBodySkeleton.svelte`
 - Create: `src/lib/components/comments/CommentThreadSkeleton.svelte`
 
 **Interfaces:**
+
 - Produces: presentational components with no props (or optional `class` only if needed)
 
 - [ ] **Step 1: Create `PostBodySkeleton.svelte`**
@@ -379,9 +385,11 @@ EOF
 ### Task 4: Slug `load` returns shell
 
 **Files:**
+
 - Modify: `src/routes/(site)/posts/[slug]/+page.server.ts`
 
 **Interfaces:**
+
 - Consumes: `getPublishedPostShell`
 - Produces: `{ post: PublishedPostShell; headerTone: 'light' }` or `error(404)`
 
@@ -425,10 +433,12 @@ EOF
 ### Task 5: Refactor slug page — shell UI + article boundary
 
 **Files:**
+
 - Modify: `src/routes/(site)/posts/[slug]/+page.svelte`
 - Modify: `src/lib/blog.remote.ts` (delete `getPublishedPost` if unused after this task)
 
 **Interfaces:**
+
 - Consumes: `PageProps` / `data.post`, `getPublishedPostBody`, `PostBodySkeleton`, `CommentSection`
 - Produces: working slug page with pending article body
 
@@ -561,10 +571,12 @@ EOF
 ### Task 6: CommentSection pending boundary
 
 **Files:**
+
 - Modify: `src/lib/components/comments/CommentSection.svelte`
 - Reuse: `src/lib/components/comments/CommentThreadSkeleton.svelte`
 
 **Interfaces:**
+
 - Consumes: existing `getCommentThread`, new skeleton
 - Produces: kicker outside pending; count + thread + form behind boundary
 
@@ -640,6 +652,7 @@ EOF
 ### Task 7: Final verification + docs pointer
 
 **Files:**
+
 - Optionally modify: `docs/superpowers/specs/2026-07-22-async-loading-boundaries-design.md` only if implementation diverged — prefer not rewriting; note divergences in the commit message if any.
 
 - [ ] **Step 1: Run automated checks**
@@ -668,18 +681,18 @@ Confirm against the design spec:
 
 ## Spec coverage (self-review)
 
-| Spec requirement | Task |
-|------------------|------|
-| `getPublishedPostShell` without `contentHtml` | Task 1 |
-| Load returns shell + `headerTone` + 404 | Task 4 |
-| `getPublishedPostBody` → `{ contentHtml, readingTime }` | Tasks 1–2 |
-| Head/hero/rail from shell | Task 5 |
-| Main-column excerpt in SSR + hide when body ready | Task 5 (`pending` snippet) |
-| Article `<svelte:boundary>` + skeleton | Tasks 3, 5 |
-| Comments nested boundary + skeleton | Tasks 3, 6 |
-| `readingTime` after body | Task 5 |
-| No `failed` / no list-landing-dashboard scope | Global constraints |
-| Autofixer + verification | Tasks 5–7 |
+| Spec requirement                                        | Task                       |
+| ------------------------------------------------------- | -------------------------- |
+| `getPublishedPostShell` without `contentHtml`           | Task 1                     |
+| Load returns shell + `headerTone` + 404                 | Task 4                     |
+| `getPublishedPostBody` → `{ contentHtml, readingTime }` | Tasks 1–2                  |
+| Head/hero/rail from shell                               | Task 5                     |
+| Main-column excerpt in SSR + hide when body ready       | Task 5 (`pending` snippet) |
+| Article `<svelte:boundary>` + skeleton                  | Tasks 3, 5                 |
+| Comments nested boundary + skeleton                     | Tasks 3, 6                 |
+| `readingTime` after body                                | Task 5                     |
+| No `failed` / no list-landing-dashboard scope           | Global constraints         |
+| Autofixer + verification                                | Tasks 5–7                  |
 
 ## Placeholder / consistency notes
 

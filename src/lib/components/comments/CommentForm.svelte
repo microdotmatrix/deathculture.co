@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { submitComment } from '@/lib/comments.remote';
+	import { submitComment } from '@/lib/data/comments.remote';
 
 	interface Props {
 		postId: string;

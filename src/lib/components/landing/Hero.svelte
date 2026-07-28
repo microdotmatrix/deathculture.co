@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { subscribe } from '@/lib/newsletter.remote';
+	import { subscribe } from '@/lib/data/newsletter.remote';
 	import Icon from '@iconify/svelte';
 </script>
 

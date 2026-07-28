@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { listAdminPosts } from '@/lib/blog.remote';
+	import { listAdminPosts } from '@/lib/data/blog.remote';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();

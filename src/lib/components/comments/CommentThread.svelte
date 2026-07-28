@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { togglePin } from '@/lib/comments-admin.remote';
-	import { getCommentThread } from '@/lib/comments.remote';
+	import { togglePin } from '@/lib/data/comments-admin.remote';
+	import { getCommentThread } from '@/lib/data/comments.remote';
 	import CommentForm from '@/lib/components/comments/CommentForm.svelte';
 	import CommentLikeButton from '@/lib/components/comments/CommentLikeButton.svelte';
 	import type { CommentView } from '@/lib/types';

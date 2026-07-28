@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { invalidateAll } from '$app/navigation';
 	import { Button, Input, Select, ToggleSwitch } from '@/lib/components/ui';
-	import { removeUser, updateUser } from '@/lib/users.remote';
+	import { removeUser, updateUser } from '@/lib/data/users.remote';
 
 	interface UserRowData {
 		id: string;

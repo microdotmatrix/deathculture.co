@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { page } from '$app/state';
-	import { signOut } from '@/lib/auth.remote';
+	import { signOut } from '@/lib/data/auth.remote';
 	import Logo from '@/lib/components/site/Logo.svelte';
+	import { page } from '$app/state';
 	import type { LayoutProps } from './$types';
 
 	let { data, children }: LayoutProps = $props();
@@ -10,6 +10,7 @@
 		data.user.role === 'admin'
 			? [
 					{ href: '/dashboard', label: 'Posts' },
+					{ href: '/dashboard/team', label: 'Team' },
 					{ href: '/dashboard/users', label: 'Users' },
 					{ href: '/dashboard/comments', label: 'Comments' }
 				]

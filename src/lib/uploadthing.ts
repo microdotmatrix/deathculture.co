@@ -1,4 +1,4 @@
 import { generateSvelteHelpers } from '@uploadthing/svelte';
-import type { PostFileRouter } from './server/uploadthing';
+import type { AppFileRouter } from './server/uploadthing';
 
-export const { createUploadThing } = generateSvelteHelpers<PostFileRouter>();
+export const { createUploadThing } = generateSvelteHelpers<AppFileRouter>();

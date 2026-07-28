@@ -5,6 +5,7 @@ export { default as Checkbox } from './Checkbox.svelte';
 export { default as EmptyState } from './EmptyState.svelte';
 export { default as Field } from './Field.svelte';
 export { default as IconButton } from './IconButton.svelte';
+export { default as ImageUpload } from './ImageUpload.svelte';
 export { default as Input } from './Input.svelte';
 export { default as Select } from './Select.svelte';
 export { default as Spinner } from './Spinner.svelte';

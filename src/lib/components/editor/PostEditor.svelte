@@ -2,7 +2,7 @@
 	import { tick } from 'svelte';
 	import { MediaQuery } from 'svelte/reactivity';
 	import { goto, replaceState } from '$app/navigation';
-	import { deletePost, getEditorPost, savePost } from '@/lib/blog.remote';
+	import { deletePost, getEditorPost, savePost } from '@/lib/data/blog.remote';
 	import FeatureImageUpload from '@/lib/components/editor/FeatureImageUpload.svelte';
 	import TagInput from '@/lib/components/editor/TagInput.svelte';
 	import Tiptap from '@/lib/components/editor/Tiptap.svelte';

@@ -10,7 +10,7 @@ The death-positive community: readers who actively engage with mortality as a le
 living well, rather than avoiding it. They arrive by choice, culturally curious and
 intellectually engaged, not in acute crisis. They read essays, follow the culture and
 history of death, and are the kind of audience that subscribes to a newsletter and a
-podcast (*DeathChat*) because the subject matters to them. Their job to be done: to think
+podcast (_DeathChat_) because the subject matters to them. Their job to be done: to think
 about death honestly, on their own terms, in the company of a voice that treats them as
 capable adults.
 
@@ -21,7 +21,7 @@ write and publish posts. That surface serves the workflow; it is not the brand.
 
 deathculture.co is a content and media brand exploring death culture, mortality, and
 memento mori. It publishes long-form writing, hosts community conversation through comments,
-grows an audience via newsletter, and is launching the *DeathChat* podcast. Success looks
+grows an audience via newsletter, and is launching the _DeathChat_ podcast. Success looks
 like: a reader lands, feels the point of view immediately, reads something that stays with
 them, and subscribes. The site is not a utility to get through; the site is the product.
 

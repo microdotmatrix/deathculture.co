@@ -3,9 +3,25 @@
 	import { page } from '$app/state';
 	import CommentModerationRow from '@/lib/components/dashboard/CommentModerationRow.svelte';
 	import { EmptyState, Field, Select } from '@/lib/components/ui';
-	import type { PageProps } from './$types';
+	import { listAdminPostOptions, listModerationComments } from '@/lib/data/comments-admin.remote';
 
-	let { data }: PageProps = $props();
+	const STATUSES = ['pending', 'published'] as const;
+	type CommentStatus = (typeof STATUSES)[number];
+
+	function parseStatus(value: string | null): CommentStatus | null {
+		return STATUSES.includes(value as CommentStatus) ? (value as CommentStatus) : null;
+	}
+
+	const statusFilter = $derived(parseStatus(page.url.searchParams.get('status')));
+	const postIdFilter = $derived(page.url.searchParams.get('post') ?? '');
+
+	const comments = $derived(
+		await listModerationComments({
+			status: statusFilter ?? undefined,
+			postId: postIdFilter || undefined
+		})
+	);
+	const posts = await listAdminPostOptions();
 
 	function applyFilter(key: 'status' | 'post', value: string) {
 		const params = new URLSearchParams(page.url.searchParams.toString());
@@ -31,7 +47,7 @@
 <div class="filters">
 	<Field label="Status" orientation="inline">
 		<Select
-			value={data.filters.status}
+			value={statusFilter ?? 'all'}
 			onchange={(event) => applyFilter('status', event.currentTarget.value)}
 		>
 			<option value="all">All</option>
@@ -42,24 +58,24 @@
 
 	<Field label="Post" orientation="inline">
 		<Select
-			value={data.filters.postId}
+			value={postIdFilter}
 			onchange={(event) => applyFilter('post', event.currentTarget.value)}
 		>
 			<option value="">All posts</option>
-			{#each data.posts as item (item.id)}
+			{#each posts as item (item.id)}
 				<option value={item.id}>{item.title}</option>
 			{/each}
 		</Select>
 	</Field>
 </div>
 
-{#if data.comments.length === 0}
+{#if comments.length === 0}
 	<div class="empty-wrap">
 		<EmptyState>No comments match these filters.</EmptyState>
 	</div>
 {:else}
 	<ul class="mod-list">
-		{#each data.comments as row (row.id)}
+		{#each comments as row (row.id)}
 			<li><CommentModerationRow {row} /></li>
 		{/each}
 	</ul>

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getPublishedPostBody } from '@/lib/blog.remote';
+	import { getPublishedPostBody } from '@/lib/data/blog.remote';
 	import CommentSection from '@/lib/components/comments/CommentSection.svelte';
 	import PostBodySkeleton from '@/lib/components/posts/PostBodySkeleton.svelte';
 	import Logo from '@/lib/components/site/Logo.svelte';

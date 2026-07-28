@@ -6,12 +6,12 @@ Add perceived-performance loading states for dynamic post content using Svelte `
 
 ## Decisions
 
-| Topic | Choice |
-|-------|--------|
-| Scope (v1) | Public `/posts/[slug]` only; nested boundaries for article body vs comments |
-| SEO strategy | Shell (metadata + excerpt) via `+page.server.ts`; full HTML via remote + boundary |
-| Pending UI | Dual-purpose: human-facing skeletons + SSR excerpt in the document for crawlers |
-| Error UI | Pending only — no `failed` snippets this pass |
+| Topic        | Choice                                                                                                            |
+| ------------ | ----------------------------------------------------------------------------------------------------------------- |
+| Scope (v1)   | Public `/posts/[slug]` only; nested boundaries for article body vs comments                                       |
+| SEO strategy | Shell (metadata + excerpt) via `+page.server.ts`; full HTML via remote + boundary                                 |
+| Pending UI   | Dual-purpose: human-facing skeletons + SSR excerpt in the document for crawlers                                   |
+| Error UI     | Pending only — no `failed` snippets this pass                                                                     |
 | Out of scope | Auto-generated excerpts, journal/landing/dashboard boundaries, `$effect.pending()` refresh UX, true streaming SSR |
 
 ## Architecture
@@ -108,11 +108,11 @@ Add a `PublishedPostShell` type in `src/lib/types.ts` (or colocated with blog he
 
 ## Error handling
 
-| Case | Behavior |
-|------|----------|
-| Unknown slug | `load` → `error(404)` before page render |
-| Body remote 404 mid-flight | Bubbles (no `failed` UI in v1) |
-| Comment thread failure | Bubbles from comments boundary (no `failed` in v1) |
+| Case                       | Behavior                                           |
+| -------------------------- | -------------------------------------------------- |
+| Unknown slug               | `load` → `error(404)` before page render           |
+| Body remote 404 mid-flight | Bubbles (no `failed` UI in v1)                     |
+| Comment thread failure     | Bubbles from comments boundary (no `failed` in v1) |
 
 ## Out of scope (explicit)
 

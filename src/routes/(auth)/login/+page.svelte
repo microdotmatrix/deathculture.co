@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { signIn } from '@/lib/auth.remote';
+	import { signIn } from '@/lib/data/auth.remote';
 
 	const formIssues = $derived(
 		signIn.fields.allIssues()?.filter((issue) => !issue.path?.length) ?? []
@@ -38,7 +38,7 @@
 		{/each}
 	</label>
 
-	<button disabled={!!signIn.pending}>
+	<button type="submit" aria-busy={Boolean(signIn.pending)} disabled={Boolean(signIn.pending)}>
 		{signIn.pending ? 'Signing in…' : 'Sign in'}
 	</button>
 </form>

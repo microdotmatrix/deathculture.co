@@ -21,10 +21,12 @@
 ### Task 1: Add post query remotes
 
 **Files:**
+
 - Modify: `src/lib/blog.remote.ts`
 - Reuse: `src/lib/server/blog.ts` (`listPublishedPosts`, `getPublishedPostBySlug`, `formatPostDate`)
 
 **Interfaces:**
+
 - Produces:
   - `listPublishedPosts = query(z.number().int().positive().optional(), …)` or overload via optional schema — prefer `query(z.object({ limit: z.number().optional() }).optional(), …)` or two exports; simplest: `query(z.number().positive().optional(), async (limit) => listPublishedPosts(limit))` if Zod optional arg works; else `query(z.object({ limit: z.number().positive().optional() }), …)` with `listPublishedPosts()` for no-arg via default empty object.
   - Practical API matching current callers:
@@ -44,10 +46,12 @@
 ### Task 2: Add `getCommentThread` query
 
 **Files:**
+
 - Modify: `src/lib/comments.remote.ts`
 - Reuse: `listPublishedComments`, `resolveViewerIdentity`
 
 **Interfaces:**
+
 - Produces: `getCommentThread = query(z.string().min(1), async (postId) => ({ comments, memberName, guestName, canComment, canLike }))`
 
 - [ ] **Step 1:** Add query returning the same fields currently returned from the slug page load (minus post body).
@@ -58,6 +62,7 @@
 ### Task 3: Wire public pages
 
 **Files:**
+
 - Modify: `src/routes/(site)/+page.svelte`
 - Delete: `src/routes/(site)/+page.server.ts`
 - Modify: `src/routes/(site)/posts/+page.svelte`
@@ -75,6 +80,7 @@
 ### Task 4: Wire `CommentSection` + mutation refresh
 
 **Files:**
+
 - Modify: `src/lib/components/comments/CommentSection.svelte`
 - Modify: `src/lib/components/comments/CommentLikeButton.svelte` (if it invalidateAlls)
 - Related: form submit success paths that currently `invalidateAll`
@@ -88,6 +94,7 @@
 ### Task 5: Wire dashboard + editor
 
 **Files:**
+
 - Modify: `src/routes/dashboard/+page.server.ts` (auth/role only; drop DB)
 - Modify: `src/routes/dashboard/+page.svelte`
 - Modify: `src/routes/dashboard/posts/[id]/+page.server.ts` (auth only)

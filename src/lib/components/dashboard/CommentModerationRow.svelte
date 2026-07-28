@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { invalidateAll } from '$app/navigation';
-	import { deleteComment, togglePin, updateCommentBody } from '@/lib/comments-admin.remote';
+	import { refreshAll } from '$app/navigation';
+	import { deleteComment, togglePin, updateCommentBody } from '@/lib/data/comments-admin.remote';
 	import { Badge, Button, Textarea } from '@/lib/components/ui';
 
 	interface ModerationComment {
@@ -43,7 +43,7 @@
 
 		try {
 			await action();
-			await invalidateAll();
+			await refreshAll();
 		} catch (error) {
 			errorMessage = error instanceof Error ? error.message : 'Something went wrong';
 		} finally {
